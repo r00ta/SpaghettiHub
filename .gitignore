@@ -1,0 +1,8 @@
+cache
+__pycache__
+.pytest_cache
+*.pyc
+*.pyo
+*.db
+*.db-shm
+*.db-wal
