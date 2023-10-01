@@ -61,11 +61,10 @@ class Storage():
             print(f"URL: {b.bug.web_link}")
             print(f"Created: {b.bug.date_created}")
             print(f"Last Updated: {b.bug.date_last_updated}")
-            print(b.bug.description)
+            print(f"Description: {b.bug.description}")
             for i, m in enumerate(b.bug.messages):
                 print(f"Comment #{i}")
-                print(m.content)
-                print()
+                print(f"{m.content}\n")
             print("*"*20)
 
     def store_bug(self, b):
@@ -76,7 +75,7 @@ class Storage():
             existing_bug = cur.fetchone()
 
             if existing_bug is None or datetime.strptime(existing_bug[0], "%Y-%m-%d %H:%M:%S.%f%z") < b.bug.date_last_updated:
-                self.con.execute("BEGIN TRANSACTION")  # Start a transaction
+                self.con.execute("BEGIN TRANSACTION")
                 # Bug is not in database or is outdated, so insert or update it
                 title_id = cur.execute("INSERT INTO texts (content) VALUES (?)", (b.bug.title,)).lastrowid
                 description_id = cur.execute("INSERT INTO texts (content) VALUES (?)", (b.bug.description,)).lastrowid
@@ -104,7 +103,7 @@ class Storage():
                     cur.execute("INSERT INTO issue_comments (bug_id, text_id) VALUES (?, ?)", (b.bug.id, comment_id))
 
                 self.con.commit()
-                self.print_bug(b)
+                self.print_bug(b, verbose=True)
             else:
                 print(f"Bug LP#{b.bug.id} [{b.status}] is up to date, skipping...")
         except Exception as e:
