@@ -1,6 +1,7 @@
 import argparse
 import sqlite3
 from datetime import datetime
+from tqdm import tqdm
 from launchpadlib.launchpad import Launchpad
 
 CACHEDIR = "./cache"
@@ -55,19 +56,23 @@ class Storage():
         """)
         cur.close()
     
-    def print_bug(self, bug, verbose=False):
-        print(f"LP#{b.bug.id}: [{b.status}] {b.bug.title}")
+    def print_bug(self, b, verbose=False):
+        tqdm.write(f"LP#{b.bug.id}: [{b.status}] {b.bug.title}")
         if verbose:
-            print(f"URL: {b.bug.web_link}")
-            print(f"Created: {b.bug.date_created}")
-            print(f"Last Updated: {b.bug.date_last_updated}")
-            print(f"Description: {b.bug.description}")
+            tqdm.write(f"URL: {b.bug.web_link}")
+            tqdm.write(f"Created: {b.bug.date_created}")
+            tqdm.write(f"Last Updated: {b.bug.date_last_updated}")
+            tqdm.write(f"Description: {b.bug.description}")
             for i, m in enumerate(b.bug.messages):
-                print(f"Comment #{i}")
-                print(f"{m.content}\n")
-            print("*"*20)
+                tqdm.write(f"Comment #{i}")
+                tqdm.write(f"{m.content}\n")
+            tqdm.write("*"*20)
 
-    def store_bug(self, b):
+    def store_bugs(self, bugs):
+        for b in tqdm(bugs, desc='Processing bugs'):
+            self._store_bug(b)
+
+    def _store_bug(self, b):
         cur = self.con.cursor()
         try:
             # Check if bug already exists and get its last updated date
@@ -105,7 +110,7 @@ class Storage():
                 self.con.commit()
                 self.print_bug(b, verbose=True)
             else:
-                print(f"Bug LP#{b.bug.id} [{b.status}] is up to date, skipping...")
+                tqdm.write(f"Bug LP#{b.bug.id} [{b.status}] is up to date, skipping...")
         except Exception as e:
             self.con.rollback();
             print(f"When processing bug {b.bug.id}, an error occurred: {e}")
@@ -123,7 +128,7 @@ class Storage():
             cur.execute("SELECT text_id, content FROM texts")
             all_texts = cur.fetchall()
 
-            for text_id, content in all_texts:
+            for text_id, content in tqdm(all_texts, desc='Generating embeddings'):
                 # Start a transaction for each embedding creation
                 self.con.execute("BEGIN TRANSACTION")  
 
@@ -158,7 +163,6 @@ if __name__=="__main__":
     lp = Launchpad.login_with("Bug Triage Assistant", "production", CACHEDIR, version="devel")
     project = lp.projects[args.project]
     bugs = project.searchTasks(status=BUG_STATES)
-    for b in bugs:
-        st.store_bug(b)
+    st.store_bugs(bugs)
     st.update_embeddings()
     st.close()

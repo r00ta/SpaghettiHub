@@ -1,0 +1,3 @@
+launchpadlib >= 1.11
+keyring >= 23.9
+tqdm >= 4.66
