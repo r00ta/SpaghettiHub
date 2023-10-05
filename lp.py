@@ -1,8 +1,11 @@
 import argparse
 import sqlite3
+import sqlite_vss
+import torch
 from datetime import datetime
 from tqdm import tqdm
 from launchpadlib.launchpad import Launchpad
+from transformers import AutoTokenizer, AutoModel
 
 CACHEDIR = "./cache"
 BUG_STATES = ['New', "Fix Committed",]
@@ -11,10 +14,16 @@ class Storage():
     def __init__(self, name) -> None:
         self.con = self._create_database(name)
         self._create_tables()
+        self.tokenizer = AutoTokenizer.from_pretrained('BAAI/bge-large-en-v1.5')
+        self.model = AutoModel.from_pretrained('BAAI/bge-large-en-v1.5')
 
     def _create_database(self, name="issues"):
         db_name = f"{name}.db"
         con = sqlite3.connect(db_name)
+        con.enable_load_extension(True)
+        sqlite_vss.load(con)
+        version, = con.execute('SELECT vss_version()').fetchone()
+        print(f"sqlite-vss version: {version}")
         con.execute("PRAGMA journal_mode=WAL;")
         con.execute("PRAGMA synchronous=NORMAL;")
         return con
@@ -118,8 +127,10 @@ class Storage():
             cur.close()
 
     def generate_embedding(self, content):
-        # Placeholder method for now
-        return content[:16]
+        inputs = self.tokenizer(content, return_tensors='pt', truncation=True, padding=True)
+        outputs = self.model(**inputs)
+        embeddings = outputs.last_hidden_state.mean(dim=1)
+        return embeddings.cpu().detach().numpy().tobytes()
 
     def update_embeddings(self):
         cur = self.con.cursor()
