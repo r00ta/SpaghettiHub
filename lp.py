@@ -2,6 +2,7 @@ import argparse
 import sqlite3
 import torch
 import numpy as np
+from numpy.linalg import norm
 from datetime import datetime
 from tqdm import tqdm
 from launchpadlib.launchpad import Launchpad
@@ -20,6 +21,21 @@ BUG_STATES = [
     "Won't Fix",
 ]
 
+def cosine_similarity(a, b):
+    return np.dot(a, b)/(norm(a) * norm(b))
+
+class Search:
+    def __init__(self, storage):
+        self.storage = storage
+        self.embeddings = []
+        self.load_embeddings()
+
+    def load_embeddings(self):
+        self.embeddings = self.storage.get_embeddings()
+    
+    def find_similar(self, prompt, limit=10):
+        q = self.storage.generate_embedding(prompt)
+        return sorted((cosine_similarity(q, e), i) for i, e in self.embeddings)[-limit:]
 
 class Storage:
     def __init__(self, name) -> None:
@@ -239,17 +255,7 @@ class Storage:
         self.con.close()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog="launchpad-bug-triage",
-        description="Launchpad Bug Triage Assistant",
-    )
-    parser.add_argument(
-        "-p", "--project", default="maas", help="Launchpad project name"
-    )
-    args = parser.parse_args()
-
-    st = Storage(args.project)
+def update_database(st):
     lp = Launchpad.login_with(
         "Bug Triage Assistant", "production", CACHEDIR, version="devel"
     )
@@ -271,3 +277,17 @@ if __name__ == "__main__":
     st.set_last_updated(current_date)
     st.update_embeddings()
     st.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="launchpad-bug-triage",
+        description="Launchpad Bug Triage Assistant",
+    )
+    parser.add_argument(
+        "-p", "--project", default="maas", help="Launchpad project name"
+    )
+    args = parser.parse_args()
+
+    st = Storage(args.project)
+    update_database(st)
