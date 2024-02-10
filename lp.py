@@ -103,7 +103,7 @@ class Storage:
             tqdm.write(f"Last Updated: {b.bug.date_last_updated}")
             tqdm.write(f"Description: {b.bug.description}")
             for i, m in enumerate(b.bug.messages):
-                tqdm.write(f"Comment #{i}")
+                tqdm.write(f"Comment #{i+1}")
                 tqdm.write(f"{m.content}\n")
             tqdm.write("*" * 20)
 
@@ -171,7 +171,7 @@ class Storage:
                 )
 
                 # Insert comments data
-                for i, m in enumerate(b.bug.messages):
+                for m in b.bug.messages[1:]: # skip comment #0 which is identical to the description
                     comment_id = cur.execute(
                         "INSERT INTO texts (content) VALUES (?)", (m.content,)
                     ).lastrowid
