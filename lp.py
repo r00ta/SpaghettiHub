@@ -171,7 +171,12 @@ class Storage:
                 )
 
                 # Insert comments data
-                for m in b.bug.messages[1:]: # skip comment #0 which is identical to the description
+                first = True
+                for m in b.bug.messages: 
+                    # skip comment #0 which is identical to the description
+                    if first:
+                        first = False
+                        continue
                     comment_id = cur.execute(
                         "INSERT INTO texts (content) VALUES (?)", (m.content,)
                     ).lastrowid
