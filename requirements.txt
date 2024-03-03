@@ -4,4 +4,3 @@ keyring >= 23.9
 tqdm >= 4.66
 torch == 2.1+cpu
 transformers >= 4.34
-sqlite-vss >= 0.1
