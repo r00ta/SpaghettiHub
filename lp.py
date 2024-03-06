@@ -33,9 +33,22 @@ class Search:
     def load_embeddings(self):
         self.embeddings = self.storage.get_embeddings()
     
-    def find_similar(self, prompt, limit=10):
+    def find_similar_texts(self, prompt):
         q = self.storage.generate_embedding(prompt)
-        return sorted((cosine_similarity(q, e), i) for i, e in self.embeddings)[-limit:]
+        return sorted(((cosine_similarity(q, e), i) for i, e in self.embeddings), reverse=True)
+
+    def find_similar_issues(self, prompt, limit=10):
+        result = []
+        unique_issues = set()
+        # TODO: retrieve all issue information, build a json
+        # TODO: augment all text_ids in the retrieved set with similarity information
+        for similarity, text_id in self.find_similar_texts(prompt):
+            issue_id = self.storage.get_issue_related_with_text_id(text_id)
+            result.append((issue_id, text_id, similarity))
+            unique_issues.add(issue_id)
+            if len(unique_issues) == limit:
+                break
+        return result
 
 class Storage:
     def __init__(self, name) -> None:
@@ -256,6 +269,20 @@ class Storage:
         result = cur.fetchone()
         return datetime.strptime(result[0], "%Y-%m-%d %H:%M:%S.%f") if result else None
 
+    def get_issue_related_with_text_id(self, text_id):
+        cur = self.con.cursor()
+        cur.execute("""SELECT i.bug_id
+            FROM issues i
+            WHERE i.title_id = ?
+            OR i.description_id = ?
+            UNION
+            SELECT i.bug_id
+            FROM issues i
+            INNER JOIN issue_comments ic ON i.bug_id = ic.bug_id
+            WHERE ic.text_id = ?""", (text_id, text_id, text_id))
+        issue_id = cur.fetchone()
+        return issue_id[0] if issue_id else None
+
     def close(self):
         self.con.close()
 
@@ -281,7 +308,7 @@ def update_database(st):
         st.store_bugs(project.searchTasks(status=BUG_STATES), context="Full update")
     st.set_last_updated(current_date)
     st.update_embeddings()
-    st.close()
+
 
 
 if __name__ == "__main__":
@@ -296,3 +323,7 @@ if __name__ == "__main__":
 
     st = Storage(args.project)
     update_database(st)
+    s = Search(st)
+
+    print(list(s.find_similar_issues("multipath issue", limit=20)))
+    st.close()
