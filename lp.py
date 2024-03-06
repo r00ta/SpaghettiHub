@@ -160,7 +160,6 @@ class Storage:
                     )
 
                 # Delete existing comments before adding updated comments
-                cur.execute("DELETE FROM issue_comments WHERE bug_id = ?", (b.bug.id,))
                 cur.execute(
                     "DELETE FROM texts WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
                     (b.bug.id,),
@@ -169,6 +168,7 @@ class Storage:
                     "DELETE FROM embeddings WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
                     (b.bug.id,),
                 )
+                cur.execute("DELETE FROM issue_comments WHERE bug_id = ?", (b.bug.id,))
 
                 # Insert comments data
                 first = True
