@@ -165,20 +165,33 @@ class Storage:
                 else:
                     # Update existing bug
                     cur.execute(
+                        "SELECT title_id, description_id FROM issues WHERE bug_id = ?",
+                        (b.bug.id,)
+                    )
+                    old_title_id, old_description_id = cur.fetchone()
+                    cur.execute(
                         """
                         UPDATE issues SET date_last_updated = ?, title_id = ?, description_id = ?
                         WHERE bug_id = ?
                         """,
                         (b.bug.date_last_updated, title_id, description_id, b.bug.id),
                     )
+                    cur.execute(
+                        "DELETE FROM embeddings WHERE text_id IN (?, ?)",
+                        (old_title_id, old_description_id)
+                    )
+                    cur.execute(
+                        "DELETE FROM texts WHERE text_id IN (?, ?)",
+                        (old_title_id, old_description_id)
+                    )
 
                 # Delete existing comments before adding updated comments
                 cur.execute(
-                    "DELETE FROM texts WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
+                    "DELETE FROM embeddings WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
                     (b.bug.id,),
                 )
                 cur.execute(
-                    "DELETE FROM embeddings WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
+                    "DELETE FROM texts WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
                     (b.bug.id,),
                 )
                 cur.execute("DELETE FROM issue_comments WHERE bug_id = ?", (b.bug.id,))
