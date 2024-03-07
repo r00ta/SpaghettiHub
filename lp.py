@@ -1,7 +1,7 @@
 import argparse
 import sqlite3
-import torch
 import numpy as np
+import pprint
 from numpy.linalg import norm
 from datetime import datetime
 from tqdm import tqdm
@@ -37,18 +37,34 @@ class Search:
         q = self.storage.generate_embedding(prompt)
         return sorted(((cosine_similarity(q, e), i) for i, e in self.embeddings), reverse=True)
 
+    def _add_scores(self, nested_dict, score_mapping):
+        if "text_id" in nested_dict:
+            nested_dict["score"] = str(score_mapping[nested_dict["text_id"]])
+        else:
+            for v in nested_dict.values():
+                if isinstance(v, dict):
+                    self._add_scores(v, score_mapping)
+                elif isinstance(v, list):
+                    for item in v:
+                        self._add_scores(item, score_mapping)
+    
     def find_similar_issues(self, prompt, limit=10):
-        result = []
+        top_scores = []
         unique_issues = set()
-        # TODO: retrieve all issue information, build a json
-        # TODO: augment all text_ids in the retrieved set with similarity information
-        for similarity, text_id in self.find_similar_texts(prompt):
-            issue_id = self.storage.get_issue_related_with_text_id(text_id)
-            result.append((issue_id, text_id, similarity))
-            unique_issues.add(issue_id)
+        matching_issues = []
+        scores = self.find_similar_texts(prompt)
+        for similarity, text_id in scores:
+            bug_id = self.storage.get_issue_related_with_text_id(text_id)
+            top_scores.append((text_id, str(similarity)))
+            unique_issues.add(bug_id)
             if len(unique_issues) == limit:
                 break
-        return result
+        text_id_to_score = {text_id: score for score, text_id in scores}
+        for bug_id in unique_issues:
+            issue = self.storage.get_bug(bug_id)
+            self._add_scores(issue, text_id_to_score)
+            matching_issues.append(issue)
+        return {"scores": top_scores, "issues":matching_issues}
 
 class Storage:
     def __init__(self, name) -> None:
@@ -124,6 +140,38 @@ class Storage:
         for b in tqdm(bugs, desc=f"Processing bugs [{context}]"):
             self._store_bug(b)
 
+    def get_bug(self, bug_id):
+        return self._get_bug_summary(bug_id) | {"comments": self._get_bug_comments(bug_id)}
+    
+    def _get_bug_summary(self, bug_id):
+        cur = self.con.cursor()
+        cur.execute("""
+                SELECT text_id, content FROM texts WHERE text_id IN (
+                    SELECT title_id FROM issues WHERE bug_id = ?
+                )
+                    """, (bug_id,))
+        title_id, title_content = cur.fetchone()
+        cur.execute("""
+                SELECT text_id, content FROM texts WHERE text_id IN (
+                    SELECT description_id FROM issues WHERE bug_id = ?
+                )
+                    """, (bug_id,))
+        description_id, description_content = cur.fetchone()
+        return { "bug_id": bug_id,
+            "title": {"text_id" : title_id, "content": title_content},
+            "description": {"text_id" : description_id, "content": description_content},
+            }
+
+    def _get_bug_comments(self, bug_id):
+        cur = self.con.cursor()
+        cur.execute("""
+                SELECT text_id, content FROM texts WHERE text_id IN (
+                    SELECT text_id FROM issue_comments WHERE bug_id = ? ORDER BY rowid
+                )
+                    """, (bug_id,))
+        comments = cur.fetchall()
+        return [{"text_id": text_id, "content": comment} for text_id, comment in comments]
+    
     def _store_bug(self, b):
         cur = self.con.cursor()
         try:
@@ -338,5 +386,5 @@ if __name__ == "__main__":
     update_database(st)
     s = Search(st)
 
-    print(list(s.find_similar_issues("multipath issue", limit=20)))
+    pprint.pprint(s.find_similar_issues("multipath issue", limit=5))
     st.close()
