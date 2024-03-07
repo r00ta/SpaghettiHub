@@ -380,11 +380,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p", "--project", default="maas", help="Launchpad project name"
     )
+    subparsers = parser.add_subparsers(dest="command", help="commands")
+    update_parser = subparsers.add_parser('update', help="Update the database with the latest issues")
+    search_parser = subparsers.add_parser('search', help="Search the database for matching issues")
+    search_parser.add_argument('query', type=str, help="Search prompt")
+    search_parser.add_argument('--limit', type=int, default=5, help="Maximum number of returned results")
     args = parser.parse_args()
 
+    if args.command is None:
+        parser.print_help()
+        exit(1)
+    
     st = Storage(args.project)
-    update_database(st)
-    s = Search(st)
-
-    pprint.pprint(s.find_similar_issues("multipath issue", limit=5))
+    if args.command == 'update':
+        update_database(st)
+    elif args.command == 'search':
+        s = Search(st)
+        pprint.pprint(s.find_similar_issues(args.query, limit=args.limit))
     st.close()
