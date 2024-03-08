@@ -175,6 +175,7 @@ class Storage:
         description_id, description_content = cur.fetchone()
         return {
             "bug_id": bug_id,
+            "web_link": f"https://pad.lv/{bug_id}",
             "title": {"text_id": title_id, "content": title_content},
             "description": {"text_id": description_id, "content": description_content},
         }
@@ -383,8 +384,8 @@ def update_database(st):
     project = lp.projects[args.project]
     current_date = datetime.utcnow()
     last_updated = st.get_last_updated()
-    tqdm.write(f"Last update: {last_updated}")
     if last_updated:
+        tqdm.write(f"Last update: {last_updated}")
         st.store_bugs(
             project.searchTasks(status=BUG_STATES, created_since=last_updated),
             context="New",
@@ -427,6 +428,6 @@ if __name__ == "__main__":
     if args.command == "update":
         update_database(st)
     elif args.command == "search":
-        s = Search(st)
-        pprint.pprint(s.find_similar_issues(args.query, limit=args.limit))
+        searcher = Search(st)
+        pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))
     st.close()
