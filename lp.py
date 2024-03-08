@@ -21,8 +21,10 @@ BUG_STATES = [
     "Won't Fix",
 ]
 
+
 def cosine_similarity(a, b):
-    return np.dot(a, b)/(norm(a) * norm(b))
+    return np.dot(a, b) / (norm(a) * norm(b))
+
 
 class Search:
     def __init__(self, storage):
@@ -32,10 +34,12 @@ class Search:
 
     def load_embeddings(self):
         self.embeddings = self.storage.get_embeddings()
-    
+
     def find_similar_texts(self, prompt):
         q = self.storage.generate_embedding(prompt)
-        return sorted(((cosine_similarity(q, e), i) for i, e in self.embeddings), reverse=True)
+        return sorted(
+            ((cosine_similarity(q, e), i) for i, e in self.embeddings), reverse=True
+        )
 
     def _add_scores(self, nested_dict, score_mapping):
         if "text_id" in nested_dict:
@@ -47,7 +51,7 @@ class Search:
                 elif isinstance(v, list):
                     for item in v:
                         self._add_scores(item, score_mapping)
-    
+
     def find_similar_issues(self, prompt, limit=10):
         top_scores = []
         unique_issues = set()
@@ -64,7 +68,8 @@ class Search:
             issue = self.storage.get_bug(bug_id)
             self._add_scores(issue, text_id_to_score)
             matching_issues.append(issue)
-        return {"scores": top_scores, "issues":matching_issues}
+        return {"scores": top_scores, "issues": matching_issues}
+
 
 class Storage:
     def __init__(self, name) -> None:
@@ -144,37 +149,51 @@ class Storage:
             self._store_bug(b)
 
     def get_bug(self, bug_id):
-        return self._get_bug_summary(bug_id) | {"comments": self._get_bug_comments(bug_id)}
-    
+        return self._get_bug_summary(bug_id) | {
+            "comments": self._get_bug_comments(bug_id)
+        }
+
     def _get_bug_summary(self, bug_id):
         cur = self.con.cursor()
-        cur.execute("""
+        cur.execute(
+            """
                 SELECT text_id, content FROM texts WHERE text_id IN (
                     SELECT title_id FROM issues WHERE bug_id = ?
                 )
-                    """, (bug_id,))
+                    """,
+            (bug_id,),
+        )
         title_id, title_content = cur.fetchone()
-        cur.execute("""
+        cur.execute(
+            """
                 SELECT text_id, content FROM texts WHERE text_id IN (
                     SELECT description_id FROM issues WHERE bug_id = ?
                 )
-                    """, (bug_id,))
+                    """,
+            (bug_id,),
+        )
         description_id, description_content = cur.fetchone()
-        return { "bug_id": bug_id,
-            "title": {"text_id" : title_id, "content": title_content},
-            "description": {"text_id" : description_id, "content": description_content},
-            }
+        return {
+            "bug_id": bug_id,
+            "title": {"text_id": title_id, "content": title_content},
+            "description": {"text_id": description_id, "content": description_content},
+        }
 
     def _get_bug_comments(self, bug_id):
         cur = self.con.cursor()
-        cur.execute("""
+        cur.execute(
+            """
                 SELECT text_id, content FROM texts WHERE text_id IN (
                     SELECT text_id FROM issue_comments WHERE bug_id = ? ORDER BY rowid
                 )
-                    """, (bug_id,))
+                    """,
+            (bug_id,),
+        )
         comments = cur.fetchall()
-        return [{"text_id": text_id, "content": comment} for text_id, comment in comments]
-    
+        return [
+            {"text_id": text_id, "content": comment} for text_id, comment in comments
+        ]
+
     def _store_bug(self, b):
         cur = self.con.cursor()
         try:
@@ -217,7 +236,7 @@ class Storage:
                     # Update existing bug
                     cur.execute(
                         "SELECT title_id, description_id FROM issues WHERE bug_id = ?",
-                        (b.bug.id,)
+                        (b.bug.id,),
                     )
                     old_title_id, old_description_id = cur.fetchone()
                     cur.execute(
@@ -229,11 +248,11 @@ class Storage:
                     )
                     cur.execute(
                         "DELETE FROM embeddings WHERE text_id IN (?, ?)",
-                        (old_title_id, old_description_id)
+                        (old_title_id, old_description_id),
                     )
                     cur.execute(
                         "DELETE FROM texts WHERE text_id IN (?, ?)",
-                        (old_title_id, old_description_id)
+                        (old_title_id, old_description_id),
                     )
 
                 # Delete existing comments before adding updated comments
@@ -249,7 +268,7 @@ class Storage:
 
                 # Insert comments data
                 first = True
-                for m in b.bug.messages: 
+                for m in b.bug.messages:
                     # skip comment #0 which is identical to the description
                     if first:
                         first = False
@@ -294,7 +313,7 @@ class Storage:
             )
             texts_to_embed = cur.fetchall()
             if len(texts_to_embed) == 0:
-                tqdm.write(f"Processing embeddings: no changes")
+                tqdm.write("Processing embeddings: no changes")
                 return
 
             for text_id, content in tqdm(texts_to_embed, desc="Generating embeddings"):
@@ -338,7 +357,8 @@ class Storage:
 
     def get_issue_related_with_text_id(self, text_id):
         cur = self.con.cursor()
-        cur.execute("""SELECT i.bug_id
+        cur.execute(
+            """SELECT i.bug_id
             FROM issues i
             WHERE i.title_id = ?
             OR i.description_id = ?
@@ -346,7 +366,9 @@ class Storage:
             SELECT i.bug_id
             FROM issues i
             INNER JOIN issue_comments ic ON i.bug_id = ic.bug_id
-            WHERE ic.text_id = ?""", (text_id, text_id, text_id))
+            WHERE ic.text_id = ?""",
+            (text_id, text_id, text_id),
+        )
         issue_id = cur.fetchone()
         return issue_id[0] if issue_id else None
 
@@ -377,7 +399,6 @@ def update_database(st):
     st.update_embeddings()
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="launchpad-bug-triage",
@@ -387,20 +408,26 @@ if __name__ == "__main__":
         "-p", "--project", default="maas", help="Launchpad project name"
     )
     subparsers = parser.add_subparsers(dest="command", help="commands")
-    update_parser = subparsers.add_parser('update', help="Update the database with the latest issues")
-    search_parser = subparsers.add_parser('search', help="Search the database for matching issues")
-    search_parser.add_argument('query', type=str, help="Search prompt")
-    search_parser.add_argument('--limit', type=int, default=5, help="Maximum number of returned results")
+    update_parser = subparsers.add_parser(
+        "update", help="Update the database with the latest issues"
+    )
+    search_parser = subparsers.add_parser(
+        "search", help="Search the database for matching issues"
+    )
+    search_parser.add_argument("query", type=str, help="Search prompt")
+    search_parser.add_argument(
+        "--limit", type=int, default=5, help="Maximum number of returned results"
+    )
     args = parser.parse_args()
 
     if args.command is None:
         parser.print_help()
         exit(1)
-    
+
     st = Storage(args.project)
-    if args.command == 'update':
+    if args.command == "update":
         update_database(st)
-    elif args.command == 'search':
+    elif args.command == "search":
         s = Search(st)
         pprint.pprint(s.find_similar_issues(args.query, limit=args.limit))
     st.close()
