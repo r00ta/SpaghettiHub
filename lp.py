@@ -157,19 +157,19 @@ class Storage:
         cur = self.con.cursor()
         cur.execute(
             """
-                SELECT text_id, content FROM texts WHERE text_id IN (
-                    SELECT title_id FROM issues WHERE bug_id = ?
-                )
-                    """,
+            SELECT text_id, content FROM texts WHERE text_id IN (
+                SELECT title_id FROM issues WHERE bug_id = ?
+            )
+            """,
             (bug_id,),
         )
         title_id, title_content = cur.fetchone()
         cur.execute(
             """
-                SELECT text_id, content FROM texts WHERE text_id IN (
-                    SELECT description_id FROM issues WHERE bug_id = ?
-                )
-                    """,
+            SELECT text_id, content FROM texts WHERE text_id IN (
+                SELECT description_id FROM issues WHERE bug_id = ?
+            )
+            """,
             (bug_id,),
         )
         description_id, description_content = cur.fetchone()
@@ -183,10 +183,10 @@ class Storage:
         cur = self.con.cursor()
         cur.execute(
             """
-                SELECT text_id, content FROM texts WHERE text_id IN (
-                    SELECT text_id FROM issue_comments WHERE bug_id = ? ORDER BY rowid
-                )
-                    """,
+            SELECT text_id, content FROM texts WHERE text_id IN (
+                SELECT text_id FROM issue_comments WHERE bug_id = ? ORDER BY rowid
+            )
+            """,
             (bug_id,),
         )
         comments = cur.fetchall()
@@ -401,7 +401,6 @@ def update_database(st):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="launchpad-bug-triage",
         description="Launchpad Bug Triage Assistant",
     )
     parser.add_argument(
