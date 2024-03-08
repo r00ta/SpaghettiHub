@@ -137,6 +137,9 @@ class Storage:
             tqdm.write("*" * 20)
 
     def store_bugs(self, bugs, context):
+        if len(bugs) == 0:
+            tqdm.write(f"Processing bugs [{context}]: no changes")
+            return
         for b in tqdm(bugs, desc=f"Processing bugs [{context}]"):
             self._store_bug(b)
 
@@ -290,6 +293,9 @@ class Storage:
                 """
             )
             texts_to_embed = cur.fetchall()
+            if len(texts_to_embed) == 0:
+                tqdm.write(f"Processing embeddings: no changes")
+                return
 
             for text_id, content in tqdm(texts_to_embed, desc="Generating embeddings"):
                 # Start a transaction for each embedding creation
