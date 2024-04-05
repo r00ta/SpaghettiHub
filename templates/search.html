@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Issues</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+        .search-container {
+            text-align: center;
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            gap: 10px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"], button {
+            padding: 8px;
+        }
+        input[type="text"] {
+            width: 300px;
+        }
+        input[type="number"] {
+            width: 120px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .results-container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        .issue-title, .issue-description, .comment {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .score {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .comment {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1>Search for Issues</h1>
+        <form action="/search/" method="post">
+            <div class="form-group">
+                <label for="query">Query:</label>
+                <input type="text" id="query" name="query" required>
+            </div>
+            <div class="form-group">
+                <label for="limit">Limit:</label>
+                <input type="number" id="limit" name="limit" value="5" min="1" max="20">
+            </div>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    {% if results %}
+        <div class="results-container">
+            <h2>Results for "{{ query }}"</h2>
+            {% for issue in results.issues %}
+                <div>
+                    <h3 class="issue-title"><a href="{{ issue.web_link }}"><pre>{{ issue.title.content }}</pre></a> <span class="score">(Score: {{ issue.title.score }})</span></h3>
+                    <pre class="issue-description">{{ issue.description.content }} <span class="score">(Score: {{ issue.description.score }})</span></pre>
+                    {% if issue.comments %}
+                        <h4>{{ issue.comments | length }} Comments:</h4>
+                        {% for comment in issue.comments %}
+                            <div class="comment">
+                                <h5>Comment #{{ loop.index }} <span class="score">(Score: {{ comment.score }})</span></h5>
+                                <pre>{{ comment.content }}</pre>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <h4>No Comments</h4>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>

@@ -33,7 +33,7 @@ class Search:
         self.load_embeddings()
 
     def load_embeddings(self):
-        self.embeddings = self.storage.get_embeddings()
+        self.embeddings = list(self.storage.get_embeddings())
 
     def find_similar_texts(self, prompt):
         q = self.storage.generate_embedding(prompt)
@@ -376,28 +376,29 @@ class Storage:
     def close(self):
         self.con.close()
 
-
-def update_database(st):
-    lp = Launchpad.login_with(
-        "Bug Triage Assistant", "production", CACHEDIR, version="devel"
-    )
-    project = lp.projects[args.project]
-    current_date = datetime.utcnow()
-    last_updated = st.get_last_updated()
-    if last_updated:
-        tqdm.write(f"Last update: {last_updated}")
-        st.store_bugs(
-            project.searchTasks(status=BUG_STATES, created_since=last_updated),
-            context="New",
+    def update_database(self):
+        lp = Launchpad.login_with(
+            "Bug Triage Assistant", "production", CACHEDIR, version="devel"
         )
-        st.store_bugs(
-            project.searchTasks(status=BUG_STATES, modified_since=last_updated),
-            context="Modified",
-        )
-    else:
-        st.store_bugs(project.searchTasks(status=BUG_STATES), context="Full update")
-    st.set_last_updated(current_date)
-    st.update_embeddings()
+        project = lp.projects[args.project]
+        current_date = datetime.utcnow()
+        last_updated = self.get_last_updated()
+        if last_updated:
+            tqdm.write(f"Last update: {last_updated}")
+            self.store_bugs(
+                project.searchTasks(status=BUG_STATES, created_since=last_updated),
+                context="New",
+            )
+            self.store_bugs(
+                project.searchTasks(status=BUG_STATES, modified_since=last_updated),
+                context="Modified",
+            )
+        else:
+            self.store_bugs(
+                project.searchTasks(status=BUG_STATES), context="Full update"
+            )
+        self.set_last_updated(current_date)
+        self.update_embeddings()
 
 
 if __name__ == "__main__":
@@ -426,7 +427,7 @@ if __name__ == "__main__":
 
     st = Storage(args.project)
     if args.command == "update":
-        update_database(st)
+        st.update_database()
     elif args.command == "search":
         searcher = Search(st)
         pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))
