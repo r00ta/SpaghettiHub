@@ -65,11 +65,11 @@
         <form action="/search/" method="post">
             <div class="form-group">
                 <label for="query">Query:</label>
-                <input type="text" id="query" name="query" required>
+                <input type="text" id="query" name="query" value="{{query}}" required>
             </div>
             <div class="form-group">
                 <label for="limit">Limit:</label>
-                <input type="number" id="limit" name="limit" value="5" min="1" max="20">
+                <input type="number" id="limit" name="limit" value="{{limit}}" min="1" max="20">
             </div>
             <button type="submit">Search</button>
         </form>
