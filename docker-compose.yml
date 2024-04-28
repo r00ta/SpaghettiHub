@@ -1,0 +1,11 @@
+version: '3.2'
+services:
+  db:
+    image: library/postgres:13.1
+    container_name: launchpadllm-postgres
+    environment:
+      POSTGRES_USER: launchpadllm
+      POSTGRES_PASSWORD: launchpadllm
+      POSTGRES_DB: launchpadllm
+    ports:
+      - "5432:5432"

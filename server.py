@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, Form, Request
-from fastapi.templating import Jinja2Templates
-from typing import Optional
 import uvicorn
-from lp import Storage, Search
+from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi.templating import Jinja2Templates
+
+from training.lp import Search, Storage
 
 app = FastAPI()
 storage = Storage("maas")
@@ -27,7 +27,8 @@ async def search(request: Request, query: str = Form(...), limit: int = Form(Non
         limit = limit or 10
         results = searcher.find_similar_issues(query, limit)
         return templates.TemplateResponse(
-            "search.html", {"request": request, "results": results, "query": query, "limit": limit}
+            "search.html", {"request": request,
+                            "results": results, "query": query, "limit": limit}
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

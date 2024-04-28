@@ -10,3 +10,8 @@ __pycache__
 *.db-shm
 *.db-wal
 *.backup
+*.egg-info
+dist/
+build/
+venv/
+.idea

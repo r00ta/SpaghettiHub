@@ -1,133 +1,11 @@
-import argparse
-import sqlite3
-import numpy as np
-import pprint
-from numpy.linalg import norm
-from datetime import datetime
 from tqdm import tqdm
-from launchpadlib.launchpad import Launchpad
-from transformers import AutoTokenizer, AutoModel
-
-CACHEDIR = "./cache"
-BUG_STATES = [
-    "New",
-    "Triaged",
-    "Confirmed",
-    "In Progress",
-    "Fix Committed",
-    "Fix Released",
-    "Incomplete",
-    "Invalid",
-    "Won't Fix",
-]
-
-
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (norm(a) * norm(b))
-
-
-class Search:
-    def __init__(self, storage):
-        self.storage = storage
-        self.embeddings = []
-        self.load_embeddings()
-
-    def load_embeddings(self):
-        self.embeddings = list(self.storage.get_embeddings())
-
-    def find_similar_texts(self, prompt):
-        q = self.storage.generate_embedding(prompt)
-        return sorted(
-            ((cosine_similarity(q, e), i) for i, e in self.embeddings), reverse=True
-        )
-
-    def _add_scores(self, nested_dict, score_mapping):
-        if "text_id" in nested_dict:
-            nested_dict["score"] = str(score_mapping[nested_dict["text_id"]])
-        else:
-            for v in nested_dict.values():
-                if isinstance(v, dict):
-                    self._add_scores(v, score_mapping)
-                elif isinstance(v, list):
-                    for item in v:
-                        self._add_scores(item, score_mapping)
-
-    def find_similar_issues(self, prompt, limit=10):
-        top_scores = []
-        unique_issues = set()
-        matching_issues = []
-        scores = self.find_similar_texts(prompt)
-        for similarity, text_id in scores:
-            bug_id = self.storage.get_issue_related_with_text_id(text_id)
-            top_scores.append((text_id, str(similarity)))
-            unique_issues.add(bug_id)
-            if len(unique_issues) == limit:
-                break
-        text_id_to_score = {text_id: score for score, text_id in scores}
-        for bug_id in unique_issues:
-            issue = self.storage.get_bug(bug_id)
-            self._add_scores(issue, text_id_to_score)
-            matching_issues.append(issue)
-        return {"scores": top_scores, "issues": matching_issues}
+from transformers import AutoModel, AutoTokenizer
 
 
 class Storage:
-    def __init__(self, name) -> None:
-        self.con = self._create_database(name)
-        self._create_tables()
+    def __init__(self) -> None:
         self.tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
         self.model = AutoModel.from_pretrained("BAAI/bge-large-en-v1.5")
-
-    def _create_database(self, name="issues"):
-        db_name = f"{name}.db"
-        con = sqlite3.connect(db_name)
-        con.execute("PRAGMA journal_mode=WAL;")
-        con.execute("PRAGMA synchronous=NORMAL;")
-        return con
-
-    def _create_tables(self):
-        cur = self.con.cursor()
-        cur.executescript(
-            """
-            -- Table to store text content and a table for text embeddings
-            CREATE TABLE IF NOT EXISTS texts (
-                text_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                content TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS embeddings (
-                text_id INTEGER NOT NULL,
-                embedding BLOB,
-                FOREIGN KEY (text_id) REFERENCES texts(text_id)
-            );
-
-            -- Table to store issues
-            CREATE TABLE IF NOT EXISTS issues (
-                bug_id INTEGER PRIMARY KEY,
-                date_created DATETIME NOT NULL,
-                date_last_updated DATETIME NOT NULL,
-                web_link TEXT NOT NULL,
-                title_id INTEGER NOT NULL,
-                description_id INTEGER NOT NULL,
-                FOREIGN KEY (title_id) REFERENCES texts(text_id),
-                FOREIGN KEY (description_id) REFERENCES texts(text_id)
-            );
-
-            -- Table to store issue comments
-            CREATE TABLE IF NOT EXISTS issue_comments (
-                bug_id INTEGER NOT NULL,
-                text_id INTEGER NOT NULL,
-                FOREIGN KEY (bug_id) REFERENCES issues(bug_id),
-                FOREIGN KEY (text_id) REFERENCES texts(text_id)
-            );
-                            
-            -- Table to store the date of the last update
-            CREATE TABLE IF NOT EXISTS update_history (
-                last_updated DATETIME
-            );
-            """
-        )
-        cur.close()
 
     def print_bug(self, b, verbose=False):
         tqdm.write(f"LP#{b.bug.id}: [{b.status}] {b.bug.title}")
@@ -137,7 +15,7 @@ class Storage:
             tqdm.write(f"Last Updated: {b.bug.date_last_updated}")
             tqdm.write(f"Description: {b.bug.description}")
             for i, m in enumerate(b.bug.messages):
-                tqdm.write(f"Comment #{i+1}")
+                tqdm.write(f"Comment #{i + 1}")
                 tqdm.write(f"{m.content}\n")
             tqdm.write("*" * 20)
 
@@ -399,36 +277,3 @@ class Storage:
             )
         self.set_last_updated(current_date)
         self.update_embeddings()
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Launchpad Bug Triage Assistant",
-    )
-    parser.add_argument(
-        "-p", "--project", default="maas", help="Launchpad project name"
-    )
-    subparsers = parser.add_subparsers(dest="command", help="commands")
-    update_parser = subparsers.add_parser(
-        "update", help="Update the database with the latest issues"
-    )
-    search_parser = subparsers.add_parser(
-        "search", help="Search the database for matching issues"
-    )
-    search_parser.add_argument("query", type=str, help="Search prompt")
-    search_parser.add_argument(
-        "--limit", type=int, default=5, help="Maximum number of returned results"
-    )
-    args = parser.parse_args()
-
-    if args.command is None:
-        parser.print_help()
-        exit(1)
-
-    st = Storage(args.project)
-    if args.command == "update":
-        st.update_database()
-    elif args.command == "search":
-        searcher = Search(st)
-        pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))
-    st.close()

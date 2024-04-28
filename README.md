@@ -1,15 +1,15 @@
 # Basic semantic search for Launchpad issues
 
-This is a work-in-progress utility that makes it easier for me to find relevant issues on Launchpad.
+This is a work-in -progress utility that makes it easier for me to find relevant issues on Launchpad.
 
-## Setup
+# Setup
 ```
-python3 -m venv .venv
+python3 - m venv .venv
 . .venv/bin/activate
-pip3 install -r requirements.txt
+pip3 install - r requirements.txt
 ```
 
-## Running the tool
+# Running the tool
 There are two modes of operation: updating the local database with texts, and semantic querying. If you don't specify the launchpad project name, the script will use `maas` as the default project.
 
 ### Updating
