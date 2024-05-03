@@ -28,7 +28,8 @@ class TextsRepository(BaseRepository[MyText]):
         return MyText(**text._asdict())
 
     async def find_by_id(self, id: int) -> Optional[MyText]:
-        stmt = select("*").select_from(MyTextTable).where(MyTextTable.c.id == id)
+        stmt = select(
+            "*").select_from(MyTextTable).where(MyTextTable.c.id == id)
         result = await self.connection_provider.get_current_connection().execute(stmt)
         text = result.first()
         if not text:

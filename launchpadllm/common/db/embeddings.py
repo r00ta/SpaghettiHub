@@ -31,7 +31,8 @@ class EmbeddingsRepository(BaseRepository[Embedding]):
         return Embedding(**embedding._asdict())
 
     async def find_by_id(self, id: int) -> Optional[Embedding]:
-        stmt = select("*").select_from(EmbeddingTable).where(EmbeddingTable.c.id == id)
+        stmt = select(
+            "*").select_from(EmbeddingTable).where(EmbeddingTable.c.id == id)
         result = await self.connection_provider.get_current_connection().execute(stmt)
         embedding = result.first()
         if not embedding:

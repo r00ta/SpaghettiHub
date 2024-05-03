@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Search Launchpad Merge Proposals</title>
+    <link
+      rel="stylesheet"
+      href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
+    />
+  </head>
+  <body>
+    <div class="l-docs is-paper">
+      <div class="l-docs__header">
+        <header id="navigation" class="p-navigation is-dark">
+          <div class="l-docs__subgrid">
+            <div class="l-docs__sidebar">
+              <div class="p-navigation__banner">
+                <div class="p-navigation__tagged-logo">
+                  <a class="p-navigation__link" href="#">
+                    <div class="p-navigation__logo-tag">
+                      <img
+                        class="p-navigation__logo-icon"
+                        src="https://assets.ubuntu.com/v1/1327a600-Launchpad%2016x16%20symbol%20only.svg"
+                        alt=""
+                      />
+                    </div>
+                    <span class="p-navigation__logo-title"
+                      >Search for Merge Proposals</span
+                    >
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <section class="p-strip is-bordered l-docs__subgrid">
+          <div class="l-docs__main">
+            <div class="u-fixed-width">
+              <form
+                method="get"
+                action="/api/v1/merge_proposals:search"
+                class="p-form p-form--inline"
+              >
+                <div class="p-form__group">
+                  <label for="search-input" class="p-form__label"
+                    >Search query</label
+                  >
+                  <input
+                    type="text"
+                    id="search-input"
+                    class="p-search-box__input"
+                    name="query"
+                    placeholder="Enter search query"
+                    value="{{query}}"
+                    required
+                  />
+                </div>
+                <div class="p-form__group">
+                  <label for="size" class="p-form__label">Size</label>
+                  <div class="p-form__control">
+                    <input
+                      type="number"
+                      class="p-form__input"
+                      id="size"
+                      name="size"
+                      value="{{size}}"
+                      min="1"
+                      max="1000"
+                    />
+                  </div>
+                </div>
+                <div class="p-form__group">
+                  <button
+                    type="submit"
+                    class="p-button--positive u-align--right"
+                  >
+                    Search
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+      {% if results %}
+      <div class="l-docs__title" id="main-content">
+        <div class="p-section--shallow">
+          <div class="u-fixed-width">
+            <h1 class="u-no-margin--bottom">Results for "{{ query }}"</h1>
+          </div>
+        </div>
+      </div>
+      <div class="l-docs__main u-fixed-width">
+        {% for merge_proposal in results %}
+        <div class="p-strip is-bordered is-shallow">
+          <div class="row">
+            <div class="col-8">
+              <h3>
+                <a href="{{ merge_proposal.web_link }}">
+                  <p>{{ merge_proposal.web_link }}</p>
+                </a>
+              </h3>
+              <p>
+                {{ merge_proposal.commit_message }}
+              </p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

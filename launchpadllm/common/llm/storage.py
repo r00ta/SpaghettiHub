@@ -4,7 +4,8 @@ from transformers import AutoModel, AutoTokenizer
 
 class Storage:
     def __init__(self) -> None:
-        self.tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "BAAI/bge-large-en-v1.5")
         self.model = AutoModel.from_pretrained("BAAI/bge-large-en-v1.5")
 
     def print_bug(self, b, verbose=False):
@@ -78,7 +79,8 @@ class Storage:
         try:
             # Check if bug already exists and get its last updated date
             cur.execute(
-                "SELECT date_last_updated FROM issues WHERE bug_id = ?", (b.bug.id,)
+                "SELECT date_last_updated FROM issues WHERE bug_id = ?", (
+                    b.bug.id,)
             )
             existing_bug = cur.fetchone()
 
@@ -123,7 +125,8 @@ class Storage:
                         UPDATE issues SET date_last_updated = ?, title_id = ?, description_id = ?
                         WHERE bug_id = ?
                         """,
-                        (b.bug.date_last_updated, title_id, description_id, b.bug.id),
+                        (b.bug.date_last_updated, title_id,
+                         description_id, b.bug.id),
                     )
                     cur.execute(
                         "DELETE FROM embeddings WHERE text_id IN (?, ?)",
@@ -143,7 +146,8 @@ class Storage:
                     "DELETE FROM texts WHERE text_id IN (SELECT text_id FROM issue_comments WHERE bug_id = ?)",
                     (b.bug.id,),
                 )
-                cur.execute("DELETE FROM issue_comments WHERE bug_id = ?", (b.bug.id,))
+                cur.execute(
+                    "DELETE FROM issue_comments WHERE bug_id = ?", (b.bug.id,))
 
                 # Insert comments data
                 first = True
@@ -165,7 +169,8 @@ class Storage:
                     b, verbose=True
                 )  # TODO: retrieve verbosity from command line parameters
             else:
-                tqdm.write(f"Bug LP#{b.bug.id} [{b.status}] is up to date, skipping...")
+                tqdm.write(
+                    f"Bug LP#{b.bug.id} [{b.status}] is up to date, skipping...")
         except Exception as e:
             self.con.rollback()
             print(f"When processing bug {b.bug.id}, an error occurred: {e}")
@@ -264,11 +269,13 @@ class Storage:
         if last_updated:
             tqdm.write(f"Last update: {last_updated}")
             self.store_bugs(
-                project.searchTasks(status=BUG_STATES, created_since=last_updated),
+                project.searchTasks(status=BUG_STATES,
+                                    created_since=last_updated),
                 context="New",
             )
             self.store_bugs(
-                project.searchTasks(status=BUG_STATES, modified_since=last_updated),
+                project.searchTasks(status=BUG_STATES,
+                                    modified_since=last_updated),
                 context="Modified",
             )
         else:

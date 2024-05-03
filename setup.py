@@ -6,13 +6,17 @@ setup(
     author='Jacopo Rota',
     description='CLI to print the top 10 deb packages that have the most files associated '
                 'with them for a certain architecture.',
-    python_requires='>=3.5',
-    packages=find_packages(include=['launchpadllm', 'launchpadllm.*'],
-                           exclude=['*tests*']),
+    python_requires='>=3.10',
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         "requests==2.28.1"
     ],
     entry_points={
-        'console_scripts': ['launchpadllm=launchpadllm.training.main:main'],
-    }
+        'console_scripts': [
+            'lauchpadllm=launchpadllm.training.main:main',
+            'launchpadmp=launchpadllm.training.merge_proposals:main',
+            'lauchpadllmserver=launchpadllm.server.main:run'
+        ],
+    },
 )

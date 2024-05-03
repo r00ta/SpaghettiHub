@@ -3,6 +3,7 @@ from sqlalchemy import (Column, DateTime, ForeignKey, Integer, LargeBinary,
 
 from launchpadllm.common.db.sequences import (BugCommentSequence,
                                               EmbeddingSequence,
+                                              MergeProposalsSequence,
                                               MyTextSequence)
 
 METADATA = MetaData()
@@ -30,7 +31,8 @@ BugTable = Table(
     Column("date_last_updated", DateTime(timezone=True)),
     Column("web_link", Text, nullable=False),
     Column("title_id", Integer, ForeignKey("text.id", ondelete="CASCADE")),
-    Column("description_id", Integer, ForeignKey("text.id", ondelete="CASCADE")),
+    Column("description_id", Integer, ForeignKey(
+        "text.id", ondelete="CASCADE")),
 )
 
 BugCommentTable = Table(
@@ -46,4 +48,16 @@ LastUpdateTable = Table(
     METADATA,
     Column("id", Integer, primary_key=True),
     Column("last_updated", DateTime(timezone=True)),
+)
+
+MergeProposalTable = Table(
+    "merge_proposal",
+    METADATA,
+    Column("id", Integer, MergeProposalsSequence, primary_key=True),
+    Column("date_merged", DateTime(timezone=True), nullable=False),
+    Column("commit_message", Text, nullable=True),
+    Column("source_git_path", Text, nullable=False),
+    Column("target_git_path", Text, nullable=False),
+    Column("registrant_name", Text, nullable=False),
+    Column("web_link", Text, nullable=False),
 )
