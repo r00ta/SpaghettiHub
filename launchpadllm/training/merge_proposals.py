@@ -67,7 +67,7 @@ async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(METADATA.create_all)
 
-    await update_database(args, engine)
+    await update_database(engine)
     await engine.dispose()
 
 

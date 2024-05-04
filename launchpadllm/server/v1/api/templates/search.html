@@ -43,7 +43,7 @@
               >
                 <div class="p-form__group">
                   <label for="search-input" class="p-form__label"
-                    >Search query</label
+                    >Commit message contains</label
                   >
                   <input
                     type="text"
@@ -100,6 +100,20 @@
                   <p>{{ merge_proposal.web_link }}</p>
                 </a>
               </h3>
+              <button class="p-chip--information">
+                <span class="p-chip__lead">Date merged:</span>
+                <span class="p-chip__value">{{ merge_proposal.date_merged }}</span>
+              </button>
+              <br>
+              <button class="p-chip">
+                <span class="p-chip__lead">Registrant</span>
+                <span class="p-chip__value">{{ merge_proposal.registrant_name }}</span>
+              </button>
+              <br>
+              <button class="p-chip--positive">
+                <span class="p-chip__lead">Target branch:</span>
+                <span class="p-chip__value">{{ merge_proposal.target_git_path }}</span>
+              </button>
               <p>
                 {{ merge_proposal.commit_message }}
               </p>
