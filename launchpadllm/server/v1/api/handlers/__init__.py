@@ -4,7 +4,7 @@ from launchpadllm.server.v1.api.handlers.merge_proposals import \
 from launchpadllm.server.v1.api.handlers.root import RootHandler
 
 APIv1 = API(
-    prefix="/api/v1",
+    prefix="/v1",
     handlers=[
         RootHandler(),
         MergeProposalsHandler()

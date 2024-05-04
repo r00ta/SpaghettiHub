@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import Depends, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
 
@@ -16,4 +17,4 @@ class RootHandler(Handler):
 
     @handler(path="/", methods=["GET"], include_in_schema=False)
     async def get(self, request: Request):
-        return templates.TemplateResponse("index.html", {"request": request})
+        return RedirectResponse("/v1")

@@ -9,6 +9,7 @@ setup(
     python_requires='>=3.10',
     packages=find_packages(),
     include_package_data=True,
+    package_data={'': ['**templates/*.html']},
     install_requires=[
         "requests==2.28.1"
     ],

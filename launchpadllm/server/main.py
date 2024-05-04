@@ -3,6 +3,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
+from launchpadllm.server.base.api.handlers import APIBase
 from launchpadllm.server.base.db.database import Database
 from launchpadllm.server.base.middlewares.db import TransactionMiddleware
 from launchpadllm.server.settings import Config, read_config
@@ -25,6 +26,7 @@ def create_app(config: Config) -> FastAPI:
     # middleware added here)
     app.add_middleware(TransactionMiddleware, db=db)
 
+    APIBase.register(app.router)
     APIv1.register(app.router)
     return app
 

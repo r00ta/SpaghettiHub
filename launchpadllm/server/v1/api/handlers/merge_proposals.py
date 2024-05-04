@@ -12,8 +12,6 @@ from launchpadllm.server.v1.api.models.responses.merge_proposals import (
     MergeProposalResponse, MergeProposalsListResponse)
 
 templates_path = Path(__file__).resolve().parent.parent / 'templates'
-print("ciao")
-print(str(templates_path))
 templates = Jinja2Templates(directory=str(templates_path))
 
 
