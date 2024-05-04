@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import datetime
+from typing import Optional
 
 from launchpadlib.launchpad import Launchpad
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -9,19 +10,32 @@ from transformers import AutoModel, AutoTokenizer
 
 from launchpadllm.common.db.base import ConnectionProvider
 from launchpadllm.common.db.tables import METADATA
+from launchpadllm.common.models.merge_proposals import MergeProposal
 from launchpadllm.common.services.collection import ServiceCollection
 
 CACHEDIR = "./cache"
 
 
-async def update_database(args, engine):
+async def get_latest_merge_proposal(connection_provider: ConnectionProvider, services, engine) -> Optional[MergeProposal]:
+    async with engine.connect() as conn:
+        async with conn.begin():
+            connection_provider.current_connection = conn
+            merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message("", 1, 1)
+            return merge_proposals.items[0] if merge_proposals.items else None
+
+
+async def update_database(engine):
     connection_provider = ConnectionProvider(current_connection=None)
     services = ServiceCollection.produce(connection_provider)
     lp = Launchpad.login_anonymously(
         "Merge proposals crawler", "production", CACHEDIR, version="devel"
     )
     maas = lp.git_repositories.getByPath(path="maas")
+    latest_merge_proposal = await get_latest_merge_proposal(connection_provider, services, engine)
     for merge_proposal in tqdm(maas.getMergeProposals(status="Merged"), desc=f"Processing merge proposals"):
+        if latest_merge_proposal and latest_merge_proposal.date_merged > merge_proposal.date_merged:
+            # Stop processing the MPs as we already have them
+            break
         async with engine.connect() as conn:
             async with conn.begin():
                 connection_provider.current_connection = conn
@@ -43,32 +57,18 @@ async def async_main():
     parser.add_argument(
         "-p", "--project", default="maas", help="Launchpad project name"
     )
-    subparsers = parser.add_subparsers(dest="command", help="commands")
-    update_parser = subparsers.add_parser(
-        "update", help="Update the database with the latest merge proposals"
+    parser.add_argument(
+        "-d", "--dsn", default="postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm",
+        help="The database DSN"
     )
-    search_parser = subparsers.add_parser(
-        "search", help="Search the database for matching merge proposals"
-    )
-    search_parser.add_argument("query", type=str, help="Search prompt")
     args = parser.parse_args()
 
-    if args.command is None:
-        parser.print_help()
-        exit(1)
-
-    engine = create_async_engine(
-        "postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm"
-    )
+    engine = create_async_engine(args.dsn)
     async with engine.begin() as conn:
         await conn.run_sync(METADATA.create_all)
 
-    if args.command == "update":
-        await update_database(args, engine)
-    # elif args.command == "search":
-    #     searcher = Search(st)
-    #     pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))
-    # st.close()
+    await update_database(args, engine)
+    await engine.dispose()
 
 
 def main():

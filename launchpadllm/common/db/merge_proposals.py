@@ -62,7 +62,6 @@ class MergeProposalsRepository(BaseRepository[MergeProposal]):
         # There is always at least one "default" zone being created at first startup during the migrations.
         total = (await self.connection_provider.get_current_connection().execute(total_stmt)).scalar()
 
-        print(message)
         stmt = (
             select("*")
             .select_from(MergeProposalTable)
