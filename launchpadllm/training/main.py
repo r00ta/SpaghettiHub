@@ -44,7 +44,8 @@ async def process_embeddings_in_parallel(dsn, texts):
     with tqdm(total=len(texts), desc="Generating Embeddings") as pbar:
         while text_queue:
             left_texts = text_queue.qsize()
-            pbar.n = left_texts
+            pbar.n = len(texts) - left_texts
+            pbar.refresh()
             await asyncio.sleep(5)
 
 
