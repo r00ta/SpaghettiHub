@@ -54,7 +54,7 @@ async def update_database(args, dsn, engine):
         "Bug Triage Assistant", "production", CACHEDIR, version="devel"
     )
     project = lp.projects[args.project]
-    current_date = datetime.datetime.now(datetime.UTC)
+    current_date = datetime.datetime.utcnow()
     async with engine.connect() as conn:
         async with conn.begin():
             connection_provider.current_connection = conn
