@@ -33,7 +33,6 @@ class EmbeddingWorker(multiprocessing.Process):
         while True:
             while not self.text_queue.empty():
                 text = self.text_queue.get()
-                print("next")
                 await self.process_embedding(model, tokenizer, engine, connection_provider, services, text)
 
             await asyncio.sleep(0.5)  # Avoid unnecessary clock cycles
