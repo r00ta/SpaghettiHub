@@ -1,6 +1,9 @@
 import argparse
 import asyncio
 import datetime
+import multiprocessing
+import time
+from functools import partial
 
 from launchpadlib.launchpad import Launchpad
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -10,6 +13,7 @@ from transformers import AutoModel, AutoTokenizer
 from launchpadllm.common.db.base import ConnectionProvider
 from launchpadllm.common.db.tables import METADATA
 from launchpadllm.common.services.collection import ServiceCollection
+from launchpadllm.training.bugs.embedding_worker import EmbeddingWorker
 
 CACHEDIR = "./cache"
 BUG_STATES = [
@@ -24,11 +28,26 @@ BUG_STATES = [
     "Won't Fix",
 ]
 
-TOKENIZER = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
-MODEL = AutoModel.from_pretrained("BAAI/bge-large-en-v1.5")
+
+async def process_embeddings_in_parallel(dsn, texts):
+    text_queue = multiprocessing.Queue()
+    for text in texts:
+        text_queue.put(text)
+
+    num_processes = multiprocessing.cpu_count()
+    workers = {i: EmbeddingWorker(dsn, text_queue)
+               for i in range(num_processes)}
+    for idx, worker in workers.items():
+        worker.start()
+
+    while text_queue:
+        left_texts = text_queue.qsize()
+        with tqdm(total=left_texts, desc="Generating Embeddings") as pbar:
+            pbar.update(left_texts)
+            await asyncio.sleep(5)
 
 
-async def update_database(args, engine):
+async def update_database(args, dsn, engine):
     connection_provider = ConnectionProvider(current_connection=None)
     services = ServiceCollection.produce(connection_provider)
     lp = Launchpad.login_anonymously(
@@ -86,13 +105,7 @@ async def update_database(args, engine):
             await services.last_update_service.set_last_update(current_date)
             texts = await services.texts_service.find_texts_without_embeddings()
 
-    for text in tqdm(texts, desc="Generating embeddings"):
-        async with engine.connect() as conn:
-            async with conn.begin():
-                connection_provider.current_connection = conn
-                await services.embeddings_service.generate_and_store_embedding(
-                    TOKENIZER, MODEL, text
-                )
+    await process_embeddings_in_parallel(dsn, texts)
 
 
 async def async_main():
@@ -121,14 +134,15 @@ async def async_main():
 
     # engine = create_async_engine("sqlite+aiosqlite:///lauchpad_llm.sqlite")
 
+    dsn = "postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm"
     engine = create_async_engine(
-        "postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm"
+        dsn
     )
     async with engine.begin() as conn:
         await conn.run_sync(METADATA.create_all)
 
     if args.command == "update":
-        await update_database(args, engine)
+        await update_database(args, dsn, engine)
     # elif args.command == "search":
     #     searcher = Search(st)
     #     pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))
