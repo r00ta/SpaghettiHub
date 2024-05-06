@@ -20,7 +20,7 @@ class Bug(BaseModel):
 class BugComment(BaseModel):
     id: int
     text_id: int
-    text: MyText | None
+    text: MyText | None = None
     bug_id: int
 
 
