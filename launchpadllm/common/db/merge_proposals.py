@@ -57,9 +57,12 @@ class MergeProposalsRepository(BaseRepository[MergeProposal]):
         return MergeProposal(**text._asdict())
 
     async def find_by_commit_message_match(self, message: str, page: int, size: int) -> ListResult[MergeProposal]:
+        """
+        More recent MPs first.
+        """
+
         total_stmt = select(count()).select_from(MergeProposalTable).where(
             MergeProposalTable.c.commit_message.like("%" + message + "%"))
-        # There is always at least one "default" zone being created at first startup during the migrations.
         total = (await self.connection_provider.get_current_connection().execute(total_stmt)).scalar()
 
         stmt = (

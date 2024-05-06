@@ -56,8 +56,8 @@ MergeProposalTable = Table(
     Column("id", Integer, MergeProposalsSequence, primary_key=True),
     Column("date_merged", DateTime(timezone=True), nullable=False),
     Column("commit_message", Text, nullable=True),
-    Column("source_git_path", Text, nullable=False),
-    Column("target_git_path", Text, nullable=False),
+    Column("source_git_path", Text, nullable=True),
+    Column("target_git_path", Text, nullable=True),
     Column("registrant_name", Text, nullable=False),
     Column("web_link", Text, nullable=False),
 )

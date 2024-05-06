@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Search Launchpad Merge Proposals</title>
+    <title>Search Launchpad Issues</title>
     <link
       rel="stylesheet"
       href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
@@ -25,7 +25,7 @@
                       />
                     </div>
                     <span class="p-navigation__logo-title"
-                      >Search for Merge Proposals</span
+                      >Launchpad tools</span
                     >
                   </a>
                 </div>
@@ -36,14 +36,19 @@
         <section class="p-strip is-bordered l-docs__subgrid">
           <div class="l-docs__main">
             <div class="u-fixed-width">
+              <div class="p-heading-icon">
+                <div class="p-heading-icon__header is-stacked">
+                  <h3 class="p-heading-icon__title">AI-Powered Launchpad Bug Search (for MAAS)</h3>
+                </div>
+              </div>
               <form
                 method="get"
-                action="/v1/merge_proposals:search"
+                action="/v1/bugs:search"
                 class="p-form p-form--inline"
               >
                 <div class="p-form__group">
                   <label for="search-input" class="p-form__label"
-                    >Commit message contains</label
+                    >Search query</label
                   >
                   <input
                     type="text"
@@ -56,7 +61,7 @@
                   />
                 </div>
                 <div class="p-form__group">
-                  <label for="size" class="p-form__label">Size</label>
+                  <label for="size" class="p-form__label">Limit</label>
                   <div class="p-form__control">
                     <input
                       type="number"
@@ -65,7 +70,7 @@
                       name="size"
                       value="{{size}}"
                       min="1"
-                      max="1000"
+                      max="50"
                     />
                   </div>
                 </div>
@@ -91,32 +96,38 @@
         </div>
       </div>
       <div class="l-docs__main u-fixed-width">
-        {% for merge_proposal in results %}
+        {% for issue in results %}
         <div class="p-strip is-bordered is-shallow">
           <div class="row">
             <div class="col-8">
               <h3>
-                <a href="{{ merge_proposal.web_link }}">
-                  <p>{{ merge_proposal.web_link }}</p>
+                <a href="{{ issue.bug.web_link }}">
+                  <p>{{ issue.bug.title.content }}</p>
                 </a>
+                <span class="score">(Score: {{ issue.title_score }})</span>
               </h3>
-              <button class="p-chip--information">
-                <span class="p-chip__lead">Date merged:</span>
-                <span class="p-chip__value">{{ merge_proposal.date_merged }}</span>
-              </button>
-              <br>
-              <button class="p-chip">
-                <span class="p-chip__lead">Registrant</span>
-                <span class="p-chip__value">{{ merge_proposal.registrant_name }}</span>
-              </button>
-              <br>
-              <button class="p-chip--positive">
-                <span class="p-chip__lead">Target branch:</span>
-                <span class="p-chip__value">{{ merge_proposal.target_git_path }}</span>
-              </button>
               <p>
-                {{ merge_proposal.commit_message }}
+                {{ issue.bug.description.content }}
+                <span class="score"
+                  >(Score: {{ issue.description_score }})</span
+                >
               </p>
+              {% if issue.comments %}
+                <h4>{{ issue.comments | length }} Comments:</h4>
+                  {% for comment in issue.comments %}
+                    <div class="row">
+                      <div class="col-10 col-start-large-2">
+                        <h5>
+                          Comment #{{ loop.index }}
+                          <span class="score">(Score: {{ comment.score }})</span>
+                        </h5>
+                        <p>{{ comment.bug_comment.text.content }}</p>
+                      </div>
+                    </div>
+                {% endfor %}
+              {% else %}
+                <h4>No Comments</h4>
+              {% endif %}
             </div>
           </div>
         </div>

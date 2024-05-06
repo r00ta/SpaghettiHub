@@ -21,10 +21,10 @@ class MergeProposalsService(Service):
         self.merge_proposals_repository = merge_proposals_repository
 
     async def create(self,
-                     commit_message: str,
+                     commit_message: str | None,
                      date_merged: datetime,
-                     source_git_path: str,
-                     target_git_path: str,
+                     source_git_path: str | None,
+                     target_git_path: str | None,
                      registrant_name: str,
                      web_link: str):
         await self.merge_proposals_repository.create(

@@ -20,19 +20,13 @@ async def get_latest_merge_proposal(connection_provider: ConnectionProvider, ser
     async with engine.connect() as conn:
         async with conn.begin():
             connection_provider.current_connection = conn
+            # Latest MPs come first
             merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message("", 1, 1)
             return merge_proposals.items[0] if merge_proposals.items else None
 
 
-async def update_database(engine):
-    connection_provider = ConnectionProvider(current_connection=None)
-    services = ServiceCollection.produce(connection_provider)
-    lp = Launchpad.login_anonymously(
-        "Merge proposals crawler", "production", CACHEDIR, version="devel"
-    )
-    maas = lp.git_repositories.getByPath(path="maas")
-    latest_merge_proposal = await get_latest_merge_proposal(connection_provider, services, engine)
-    for merge_proposal in tqdm(maas.getMergeProposals(status="Merged"), desc=f"Processing merge proposals"):
+async def process_merge_proposals(engine, connection_provider, services, latest_merge_proposal, merge_proposals, branch):
+    for merge_proposal in tqdm(merge_proposals, desc=f"Processing merge proposals from branch " + branch):
         if latest_merge_proposal and latest_merge_proposal.date_merged > merge_proposal.date_merged:
             # Stop processing the MPs as we already have them
             break
@@ -48,6 +42,23 @@ async def update_database(engine):
                         1],
                     web_link=merge_proposal.web_link
                 )
+
+
+async def update_database(engine):
+    connection_provider = ConnectionProvider(current_connection=None)
+    services = ServiceCollection.produce(connection_provider)
+    lp = Launchpad.login_anonymously(
+        "Merge proposals crawler", "production", CACHEDIR, version="devel"
+    )
+    latest_merge_proposal = await get_latest_merge_proposal(connection_provider, services, engine)
+
+    blz_repo_mps = lp.branches.getByPath(
+        path="~maas-committers/maas/trunk").getMergeProposals(status="Merged")
+    await process_merge_proposals(engine, connection_provider, services, latest_merge_proposal, blz_repo_mps, "blz")
+
+    maas = lp.git_repositories.getByPath(path="maas")
+    git_repo_mps = maas.getMergeProposals(status="Merged")
+    await process_merge_proposals(engine, connection_provider, services, latest_merge_proposal, git_repo_mps, "blz")
 
 
 async def async_main():

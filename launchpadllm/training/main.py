@@ -28,6 +28,9 @@ BUG_STATES = [
     "Won't Fix",
 ]
 
+MODEL = AutoModel.from_pretrained("BAAI/bge-large-en-v1.5")
+TOKENIZER = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
+
 
 async def process_embeddings_in_parallel(dsn, texts):
     text_queue = multiprocessing.Queue()
@@ -49,7 +52,7 @@ async def process_embeddings_in_parallel(dsn, texts):
             await asyncio.sleep(5)
 
 
-async def update_database(args, dsn, engine):
+async def update_database(args, engine):
     connection_provider = ConnectionProvider(current_connection=None)
     services = ServiceCollection.produce(connection_provider)
     lp = Launchpad.login_anonymously(
@@ -107,7 +110,16 @@ async def update_database(args, dsn, engine):
             await services.last_update_service.set_last_update(current_date)
             texts = await services.texts_service.find_texts_without_embeddings()
 
-    await process_embeddings_in_parallel(dsn, texts)
+    # Attempt to make this thing parallel
+    # await process_embeddings_in_parallel(dsn, texts)
+
+    for text in tqdm(texts, desc="Generating embeddings"):
+        async with engine.connect() as conn:
+            async with conn.begin():
+                connection_provider.current_connection = conn
+                await services.embeddings_service.generate_and_store_embedding(
+                    TOKENIZER, MODEL, text
+                )
 
 
 async def async_main():
@@ -117,24 +129,7 @@ async def async_main():
     parser.add_argument(
         "-p", "--project", default="maas", help="Launchpad project name"
     )
-    subparsers = parser.add_subparsers(dest="command", help="commands")
-    update_parser = subparsers.add_parser(
-        "update", help="Update the database with the latest issues"
-    )
-    search_parser = subparsers.add_parser(
-        "search", help="Search the database for matching issues"
-    )
-    search_parser.add_argument("query", type=str, help="Search prompt")
-    search_parser.add_argument(
-        "--limit", type=int, default=5, help="Maximum number of returned results"
-    )
     args = parser.parse_args()
-
-    if args.command is None:
-        parser.print_help()
-        exit(1)
-
-    # engine = create_async_engine("sqlite+aiosqlite:///lauchpad_llm.sqlite")
 
     dsn = "postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm"
     engine = create_async_engine(
@@ -143,8 +138,9 @@ async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(METADATA.create_all)
 
-    if args.command == "update":
-        await update_database(args, dsn, engine)
+    await update_database(args, engine)
+    await engine.dispose()
+
     # elif args.command == "search":
     #     searcher = Search(st)
     #     pprint.pprint(searcher.find_similar_issues(args.query, limit=args.limit))

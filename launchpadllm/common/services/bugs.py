@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from launchpadllm.common.db.base import ConnectionProvider
 from launchpadllm.common.db.bugs import BugsRepository
@@ -65,3 +65,9 @@ class BugsService(Service):
                 text_id=comment_text.id,
             )
         )
+
+    async def find_bug_by_text_id(self, text_id: int) -> Optional[Bug]:
+        return await self.bugs_repository.find_by_text_id(text_id)
+
+    async def get_bug_comments(self, bug_id: int) -> List[BugComment]:
+        return await self.bugs_repository.find_bug_comments(bug_id)

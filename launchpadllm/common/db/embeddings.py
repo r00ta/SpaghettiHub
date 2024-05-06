@@ -1,6 +1,8 @@
 from typing import Optional
 
-from sqlalchemy import delete, insert, select
+from sqlalchemy import Select, delete, desc, insert, select
+from sqlalchemy.sql.functions import count
+from sqlalchemy.sql.operators import eq
 
 from launchpadllm.common.db.repository import BaseRepository
 from launchpadllm.common.db.sequences import EmbeddingSequence
@@ -40,7 +42,22 @@ class EmbeddingsRepository(BaseRepository[Embedding]):
         return Embedding(**embedding._asdict())
 
     async def list(self, size: int, page: int) -> ListResult[Embedding]:
-        pass
+        total_stmt = select(count()).select_from(EmbeddingTable)
+        total = (await self.connection_provider.get_current_connection().execute(total_stmt)).scalar()
+
+        stmt = (
+            select("*")
+            .select_from(EmbeddingTable)
+            .order_by(desc(EmbeddingTable.c.id))
+            .offset((page - 1) * size)
+            .limit(size)
+        )
+
+        result = await self.connection_provider.get_current_connection().execute(stmt)
+        return ListResult[Embedding](
+            items=[Embedding(**row._asdict()) for row in result.all()],
+            total=total
+        )
 
     async def update(self, entity: Embedding) -> Embedding:
         pass

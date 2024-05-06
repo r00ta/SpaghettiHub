@@ -1,13 +1,52 @@
+import argparse
 import logging
 
 import uvicorn
 from fastapi import FastAPI
+from transformers import AutoModel, AutoTokenizer
 
+from launchpadllm.common.services.embeddings import EmbeddingsCache
 from launchpadllm.server.base.api.handlers import APIBase
 from launchpadllm.server.base.db.database import Database
 from launchpadllm.server.base.middlewares.db import TransactionMiddleware
 from launchpadllm.server.settings import Config, read_config
 from launchpadllm.server.v1.api.handlers import APIv1
+from launchpadllm.server.v1.middlewares.services import ServicesV1Middleware
+
+
+def nullable_str(val: str):
+    if not val or val == "None":
+        return None
+    return val
+
+
+def make_arg_parser():
+    parser = argparse.ArgumentParser(
+        description="LauchpadLLM server.")
+    parser.add_argument("--host",
+                        type=str,
+                        default="0.0.0.0",
+                        help="host name")
+    parser.add_argument("--port", type=int, default=8000, help="port number")
+    parser.add_argument(
+        "--uvicorn-log-level",
+        type=str,
+        default="info",
+        choices=['debug', 'info', 'warning', 'error', 'critical', 'trace'],
+        help="log level for uvicorn")
+    parser.add_argument("--ssl-keyfile",
+                        type=nullable_str,
+                        default=None,
+                        help="The file path to the SSL key file")
+    parser.add_argument("--ssl-certfile",
+                        type=nullable_str,
+                        default=None,
+                        help="The file path to the SSL cert file")
+    parser.add_argument("--ssl-ca-certs",
+                        type=nullable_str,
+                        default=None,
+                        help="The CA certificates file")
+    return parser
 
 
 def create_app(config: Config) -> FastAPI:
@@ -24,6 +63,11 @@ def create_app(config: Config) -> FastAPI:
 
     # The order here is important: the exception middleware must be the first one being executed (i.e. it must be the last
     # middleware added here)
+    embeddings_cache = EmbeddingsCache(
+        model=AutoModel.from_pretrained("BAAI/bge-large-en-v1.5"),
+        tokenizer=AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
+    )
+    app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache)
     app.add_middleware(TransactionMiddleware, db=db)
 
     APIBase.register(app.router)
@@ -32,6 +76,9 @@ def create_app(config: Config) -> FastAPI:
 
 
 def run():
+    parser = make_arg_parser()
+    args = parser.parse_args()
+
     app_config = read_config()
     logging.basicConfig(
         level=logging.INFO
@@ -40,8 +87,11 @@ def run():
         create_app(config=app_config),
         loop="asyncio",
         proxy_headers=True,
-        host="0.0.0.0",
-        port=1337
+        host=args.host,
+        port=args.port,
+        ssl_keyfile=args.ssl_keyfile,
+        ssl_certfile=args.ssl_certfile,
+        ssl_ca_certs=args.ssl_ca_certs
     )
     server = uvicorn.Server(server_config)
     server.run()

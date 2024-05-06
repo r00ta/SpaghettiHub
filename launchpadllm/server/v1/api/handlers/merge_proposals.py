@@ -6,8 +6,9 @@ from starlette.templating import Jinja2Templates
 from launchpadllm.common.services.collection import ServiceCollection
 from launchpadllm.server.base.api.base import Handler, handler
 from launchpadllm.server.v1.api import services
-from launchpadllm.server.v1.api.models.requests.merge_proposals import (
-    MergeProposalMessageMatch, PaginationParams)
+from launchpadllm.server.v1.api.models.requests.base import PaginationParams
+from launchpadllm.server.v1.api.models.requests.merge_proposals import \
+    MergeProposalMessageMatch
 from launchpadllm.server.v1.api.models.responses.merge_proposals import (
     MergeProposalResponse, MergeProposalsListResponse)
 
@@ -32,7 +33,8 @@ class MergeProposalsHandler(Handler):
         Serve the search page.
         """
         return templates.TemplateResponse(
-            "search.html", {"request": request, "size": 5, "query": ""}
+            "merge_proposals.html", {
+                "request": request, "size": 5, "query": ""}
         )
 
     @handler(
@@ -55,10 +57,10 @@ class MergeProposalsHandler(Handler):
             pagination_params.size
         )
         return templates.TemplateResponse(
-            "search.html", {"request": request,
-                            "results": merge_proposals.items,
-                            "query": message_query_param.query,
-                            "size": pagination_params.size}
+            "merge_proposals.html", {"request": request,
+                                     "results": merge_proposals.items,
+                                     "query": message_query_param.query,
+                                     "size": pagination_params.size}
         )
 
     @handler(

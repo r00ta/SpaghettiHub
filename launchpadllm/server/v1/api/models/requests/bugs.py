@@ -2,5 +2,5 @@ from fastapi import Query
 from pydantic import BaseModel, Field
 
 
-class MergeProposalMessageMatch(BaseModel):
+class BugsSearchParam(BaseModel):
     query: str = Field(Query())
