@@ -10,8 +10,8 @@ from starlette.types import ASGIApp
 
 from launchpadllm.common.db.base import ConnectionProvider
 from launchpadllm.common.services.collection import ServiceCollection
+from launchpadllm.common.services.embeddings import EmbeddingsCache
 from launchpadllm.server.base.db.database import Database
-from launchpadllm.server.v1.models.embeddings import EmbeddingsCache
 
 
 class ServicesV1Middleware(BaseHTTPMiddleware):
