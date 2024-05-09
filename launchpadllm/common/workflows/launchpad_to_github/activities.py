@@ -64,14 +64,14 @@ class LaunchpadToGithubActivity(ActivityBase):
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> str:
         command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror {params.target_dir}"
-        subprocess.run(command)
+        subprocess.run(command, shell=True)
         activity.heartbeat()
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             temp_dir = Path(tmpdirname)
             diff_file = temp_dir / "patch.diff"
             diff_file.write_text(params.diff)
-            command = (f"cd {params.target_dir}maas-base && "
+            command = (f"cd {params.target_dir}maas-mirror && "
                        f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                        f"git apply {str(diff_file)} && "
                        f"git add * && git commit -m 'enjoy this from r00ta' && git push origin {params.request_uuid}")
