@@ -3,12 +3,11 @@
 Description=LaunchpadLLM updater Service
 
 [Service]
-OnCalendar=00 00 * * *
 User=root
-WorkingDirectory=/home/ubuntu/launchpad_bug_triage_llm/prod/scripts
+WorkingDirectory=/home/ubuntu/launchpad_tools/prod/scripts
 ExecStart=update_database.sh
-Persistent=true
-Unit=X
+RestartSec=86400s # 1 day
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

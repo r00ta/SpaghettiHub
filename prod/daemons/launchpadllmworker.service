@@ -4,8 +4,8 @@ Description=LaunchpadLLM temporal worker Service
 
 [Service]
 User=ubuntu
-WorkingDirectory=/home/ubuntu/launchpad_bug_triage_llm
-ExecStart=/bin/bash -c "source ve/bin/activate && launchpadllmworker"
+WorkingDirectory=/home/ubuntu/launchpad_tools
+ExecStart=/bin/bash -c "source ve/bin/activate && launchpadllmworker --gh_token REDACTED"
 Restart=always
 RestartSec=15
 StartLimitInterval=0
