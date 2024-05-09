@@ -47,7 +47,7 @@ setup-temporal-database:
 
 	/opt/temporal/temporal-sql-tool --database temporal_visibility create-database
 	SQL_DATABASE=temporal_visibility /opt/temporal/temporal-sql-tool setup-schema -v 0.0
-	SQL_DATABASE=temporal_visibility /opt/temporal/temporal-sql-tool update -schema-dir /opt/temporal/temporal_src/schema/postgresql/v12/temporal/versioned
+	SQL_DATABASE=temporal_visibility /opt/temporal/temporal-sql-tool update -schema-dir /opt/temporal/temporal_src/schema/postgresql/v12/visibility/versioned
 	sudo -u postgres psql -c "ALTER USER $(DATABASE_USER) WITH NOSUPERUSER;"
 
 	sudo cp /opt/temporal/config/development-postgres.yaml /opt/temporal/config/development.yaml
