@@ -18,6 +18,7 @@ setup-postgres:
 prepare-ve:
 	python3 -m venv $(THIS_DIR)ve
 	. $(THIS_DIR)ve/bin/activate
+	pip install -r $(THIS_DIR)requirements.txt
 	python $(THIS_DIR)setup.py install
 
 migrate:
@@ -79,15 +80,13 @@ prod-create-daemons:
 
 setup-production: install-dependencies setup-postgres prepare-ve download-temporal setup-temporal-database download-temporal-cli create-temporal-namespace prod-create-daemons prod-create-daemons
 
-install-dev-dependencies: install-dependencies prepare-ve
-	. $(THIS_DIR)ve/bin/activate
-	pip install -r $(THIS_DIR)dev-requirements.txt
+
 
 git-config:
 	git config --global user.name "r00tabot"
 	git config --global user.email "r00tabot@gmail.com"
 
-setup-dev: install-dependencies install-dev-dependencies setup-postgres prepare-ve download-temporal setup-temporal-database download-temporal-cli create-temporal-namespace
+setup-dev: install-dependencies prepare-ve setup-postgres prepare-ve download-temporal setup-temporal-database download-temporal-cli create-temporal-namespace
 
 dev-start-temporal:
 	/opt/temporal/temporal-server -r $(THIS_DIR)prod -c temporal_config start

@@ -11,22 +11,7 @@ setup(
     include_package_data=True,
     package_data={'': ['**templates/*.html']},
     install_requires=[
-        "launchpadlib >= 1.11",
-        "keyring >= 23.9",
-        "tqdm >= 4.66",
-        "torch == 2.2.1",
-        "transformers >= 4.34",
-        "fastapi >= 0.110.0",
-        "uvicorn[standard] >= 0.28.0",
-        "jinja2 >= 3.1.2",
-        "python-multipart >= 0.0.9",
-        "pydantic==2.7.1",
-        "asyncpg==0.29.0",
-        "SQLAlchemy==2.0.29",
-        "alembic==1.13.1",
-        "temporalio==1.6.0",
-        "itsdangerous==2.2.0",
-        "aiohttp==3.9.5"
+        # use pip dude
     ],
     entry_points={
         'console_scripts': [

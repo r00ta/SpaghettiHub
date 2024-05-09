@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import delete, insert, select
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.sql.operators import eq, or_
 
 from launchpadllm.common.db.repository import BaseRepository
@@ -124,7 +124,18 @@ class BugsRepository(BaseRepository[Bug]):
         pass
 
     async def update(self, entity: Bug) -> Bug:
-        pass
+        stmt = (
+            update(BugTable)
+            .where(BugTable.c.id == entity.id)
+            .values(
+                title_id=entity.title_id,
+                description_id=entity.description_id,
+                date_last_updated=entity.date_last_updated,
+                web_link=entity.web_link
+            )
+        )
+        await self.connection_provider.get_current_connection().execute(stmt)
+        return entity
 
     async def delete(self, id: int) -> None:
         await self.connection_provider.get_current_connection().execute(

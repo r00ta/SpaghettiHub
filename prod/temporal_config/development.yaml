@@ -113,5 +113,5 @@ namespaceDefaults:
       URI: "file:///tmp/temporal_vis_archival/development"
 
 dynamicConfigClient:
-  filepath: "temporal_config/dynamicconfig/development-sql.yaml"
+  filepath: "/home/ubuntu/launchpad_tools/prod/temporal_config/dynamicconfig/development-sql.yaml"
   pollInterval: "10s"

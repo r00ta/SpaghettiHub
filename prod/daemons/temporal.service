@@ -5,7 +5,7 @@ Description=Temporal Service
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/
-ExecStart=/bin/bash -c "/opt/temporal/temporal-server -r ~/launchpad_bug_triage_llm/prod -c temporal_config start"
+ExecStart=/bin/bash -c "/opt/temporal/temporal-server -r ~/launchpad_tools/prod -c temporal_config start"
 Restart=always
 RestartSec=15
 StartLimitInterval=0

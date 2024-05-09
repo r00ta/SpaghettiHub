@@ -43,6 +43,7 @@ class BugsService(Service):
                 bug.title_id = title_text.id
                 bug.description_id = description_text.id
                 bug.date_last_updated = b.bug.date_last_updated
+                await self.bugs_repository.update(bug)
             await self.delete_comments(b.bug.id)
             # skip the first, always equal to the description
             first = True

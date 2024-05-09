@@ -5,7 +5,7 @@ Description=LaunchpadLLM updater Service
 [Service]
 User=root
 WorkingDirectory=/home/ubuntu/launchpad_tools/prod/scripts
-ExecStart=update_database.sh
+ExecStart=/bin/bash -c "./update_database.sh"
 RestartSec=86400s # 1 day
 Restart=always
 
