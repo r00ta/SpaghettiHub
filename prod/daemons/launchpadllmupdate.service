@@ -1,0 +1,14 @@
+# Place me under /etc/systemd/system/launchpadllmupdate.service
+[Unit]
+Description=LaunchpadLLM updater Service
+
+[Service]
+OnCalendar=00 00 * * *
+User=root
+WorkingDirectory=/home/ubuntu/launchpad_bug_triage_llm/prod/scripts
+ExecStart=update_database.sh
+Persistent=true
+Unit=X
+
+[Install]
+WantedBy=multi-user.target

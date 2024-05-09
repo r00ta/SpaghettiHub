@@ -16,4 +16,4 @@ class RootHandler(Handler):
 
     @handler(path="/", methods=["GET"], include_in_schema=False)
     async def get(self, request: Request):
-        return templates.TemplateResponse("index.html", {"request": request})
+        return templates.TemplateResponse("index.html", {"request": request, "user": request.session.get("username", None)})

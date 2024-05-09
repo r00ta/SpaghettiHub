@@ -2,15 +2,19 @@
 from launchpadllm.common.db.base import ConnectionProvider
 from launchpadllm.common.db.bugs import BugsRepository
 from launchpadllm.common.db.embeddings import EmbeddingsRepository
+from launchpadllm.common.db.github import LaunchpadToGithubWorkRepository
 from launchpadllm.common.db.last_update import LastUpdateRepository
 from launchpadllm.common.db.merge_proposals import MergeProposalsRepository
 from launchpadllm.common.db.texts import TextsRepository
+from launchpadllm.common.db.users import UsersRepository
 from launchpadllm.common.services.bugs import BugsService
 from launchpadllm.common.services.embeddings import (EmbeddingsCache,
                                                      EmbeddingsService)
+from launchpadllm.common.services.github import LaunchpadToGithubWorkService
 from launchpadllm.common.services.last_update import LastUpdateService
 from launchpadllm.common.services.merge_proposals import MergeProposalsService
 from launchpadllm.common.services.texts import TextsService
+from launchpadllm.common.services.users import UsersService
 
 
 class ServiceCollection:
@@ -19,6 +23,8 @@ class ServiceCollection:
     texts_service: TextsService
     embeddings_service: EmbeddingsService
     merge_proposals_service: MergeProposalsService
+    launchpad_to_github_work_service: LaunchpadToGithubWorkService
+    users_service: UsersService
 
     @classmethod
     def produce(cls, connection_provider: ConnectionProvider, embeddings_cache: EmbeddingsCache | None = None) -> \
@@ -53,6 +59,18 @@ class ServiceCollection:
         services.merge_proposals_service = MergeProposalsService(
             connection_provider=connection_provider,
             merge_proposals_repository=MergeProposalsRepository(
+                connection_provider=connection_provider
+            )
+        )
+        services.launchpad_to_github_work_service = LaunchpadToGithubWorkService(
+            connection_provider=connection_provider,
+            launchpad_to_github_work_repository=LaunchpadToGithubWorkRepository(
+                connection_provider=connection_provider
+            )
+        )
+        services.users_service = UsersService(
+            connection_provider=connection_provider,
+            users_repository=UsersRepository(
                 connection_provider=connection_provider
             )
         )

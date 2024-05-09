@@ -1,0 +1,14 @@
+# Place me under /etc/systemd/system/launchpadllmworker.service
+[Unit]
+Description=LaunchpadLLM temporal worker Service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/launchpad_bug_triage_llm
+ExecStart=/bin/bash -c "source ve/bin/activate && launchpadllmworker"
+Restart=always
+RestartSec=15
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

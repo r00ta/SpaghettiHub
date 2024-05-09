@@ -34,7 +34,10 @@ class BugsHandler(Handler):
         Serve the search page.
         """
         return templates.TemplateResponse(
-            "bugs.html", {"request": request, "size": 5, "query": ""}
+            "bugs.html", {"request": request,
+                          "user": request.session.get("username", None),
+                          "size": 5,
+                          "query": ""}
         )
 
     @handler(
@@ -54,6 +57,7 @@ class BugsHandler(Handler):
         bugs = await services.embeddings_service.find_similar_issues(search.query, pagination_params.size)
         return templates.TemplateResponse(
             "bugs.html", {"request": request,
+                          "user": request.session.get("username", None),
                           "results": bugs,
                           "query": search.query,
                           "size": pagination_params.size}

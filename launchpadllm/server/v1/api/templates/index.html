@@ -32,10 +32,36 @@
               </div>
             </div>
           </div>
+          <ul class="p-navigation__items">
+            <li class="p-navigation__item">
+            </li><li class="p-navigation__item">
+              {% if not user %}
+              <a class="p-navigation__link" href="/v1/login">
+                Login
+              </a>
+              {% else %}
+              <a class="p-navigation__link" href="/v1/logout">
+                Logout
+              </a>
+              {% endif %}
+            </li>
+          </ul>
         </header>
         <br>
           <div class="row">
             <div class="col">
+              <div class="p-card u-no-padding">
+                  <div class="p-card__inner">
+                    <a href="/v1/launchpad_to_github">
+                      <h3>Convert launchpad MPs to GitHub PRs</h3>
+                    </a>
+                    <p>If you want to run additional/automatic pipelines on your launchpad MP and leverage on the automatic
+                      GitHub PR editor (press "." on the PR page) to improve your reviewer experience, you can use this tool.
+                      <br>
+                      This tool requires authentication. If you want access, reach out to r00ta.
+                    </p>
+                  </div>
+              </div>
               <div class="p-card u-no-padding">
                   <div class="p-card__inner">
                     <a href="/v1/merge_proposals">
@@ -47,14 +73,14 @@
               <div class="p-card u-no-padding">
                   <div class="p-card__inner">
                     <a href="/v1/bugs">
-                      <h3>Launchpad bug finder</h3>
+                      <h3>MAAS Launchpad bug finder</h3>
                     </a>
                     <p>Use the power of AI to find your MAAS bugs.</p>
                   </div>
               </div>
               <div class="p-card u-no-padding">
                   <div class="p-card__inner">
-                    <h3>Discourse posts finder (Coming soon)</h3>
+                    <h3>MAAS Discourse posts finder (Coming soon)</h3>
                     <p>Use the power of AI to find your discourse posts for your questions.</p>
                   </div>
               </div>

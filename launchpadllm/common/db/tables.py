@@ -1,10 +1,11 @@
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, LargeBinary,
-                        MetaData, Table, Text)
+                        MetaData, String, Table, Text)
 
 from launchpadllm.common.db.sequences import (BugCommentSequence,
                                               EmbeddingSequence,
+                                              LaunchpadToGithubWorkSequence,
                                               MergeProposalsSequence,
-                                              MyTextSequence)
+                                              MyTextSequence, UsersSequence)
 
 METADATA = MetaData()
 
@@ -60,4 +61,25 @@ MergeProposalTable = Table(
     Column("target_git_path", Text, nullable=True),
     Column("registrant_name", Text, nullable=False),
     Column("web_link", Text, nullable=False),
+)
+
+LaunchpadToGithubWorkTable = Table(
+    "launchpad_to_github_work",
+    METADATA,
+    Column("id", Integer, LaunchpadToGithubWorkSequence, primary_key=True),
+    Column("requested_at", DateTime(timezone=True), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+    Column("completed_at", DateTime(timezone=True), nullable=True),
+    Column("request_uuid", String(64), nullable=False),
+    Column("status", String(64), nullable=False),
+    Column("github_url", Text, nullable=True),
+    Column("launchpad_url", Text, nullable=True),
+)
+
+UserTable = Table(
+    "user_auth",
+    METADATA,
+    Column("id", Integer, UsersSequence, primary_key=True),
+    Column("username", String(128), nullable=False),
+    Column("password", Text, nullable=False)
 )

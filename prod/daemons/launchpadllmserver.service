@@ -1,0 +1,15 @@
+# Place me under /etc/systemd/system/launchpadllmserver.service
+[Unit]
+Description=LaunchpadLLM Service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/launchpad_bug_triage_llm
+ExecStart=/bin/bash -c "source ve/bin/activate && launchpadllmserver --port 1443 --ssl-keyfile REDACTED --ssl-certfile REDACTED
+--secret REDACTED"
+Restart=always
+RestartSec=15
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,5 @@
+backend
+ve
 .ve
 .venv
 cache
@@ -16,3 +18,4 @@ dist/
 build/
 venv/
 .idea
+source

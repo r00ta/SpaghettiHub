@@ -34,7 +34,8 @@ class MergeProposalsHandler(Handler):
         """
         return templates.TemplateResponse(
             "merge_proposals.html", {
-                "request": request, "size": 5, "query": ""}
+                "request": request, "user": request.session.get("username", None), "size": 5,
+                "query": ""}
         )
 
     @handler(
@@ -58,6 +59,7 @@ class MergeProposalsHandler(Handler):
         )
         return templates.TemplateResponse(
             "merge_proposals.html", {"request": request,
+                                     "user": request.session.get("username", None),
                                      "results": merge_proposals.items,
                                      "query": message_query_param.query,
                                      "size": pagination_params.size}

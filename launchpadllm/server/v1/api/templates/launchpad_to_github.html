@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Search Launchpad Merge Proposals</title>
+    <title>Search Launchpad Issues</title>
     <link
       rel="stylesheet"
       href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
@@ -32,7 +32,7 @@
               </div>
             </div>
           </div>
-            <ul class="p-navigation__items">
+          <ul class="p-navigation__items">
             <li class="p-navigation__item">
             </li><li class="p-navigation__item">
               {% if not user %}
@@ -52,48 +52,34 @@
             <div class="u-fixed-width">
               <div class="p-heading-icon">
                 <div class="p-heading-icon__header is-stacked">
-                  <h3 class="p-heading-icon__title">Commit to merge proposal tool (for MAAS)</h3>
+                  <h3 class="p-heading-icon__title">Launchpad to GitHub (for MAAS)</h3>
                 </div>
               </div>
               <form
-                method="get"
-                action="/v1/merge_proposals:search"
+                method="post"
+                action="/v1/launchpad_to_github"
                 class="p-form p-form--inline"
               >
                 <div class="p-form__group">
                   <label for="search-input" class="p-form__label"
-                    >Commit message contains</label
+                    >Launchpad MP url</label
                   >
                   <input
                     type="text"
                     id="search-input"
                     class="p-search-box__input"
-                    name="query"
-                    placeholder="Enter search query"
-                    value="{{query}}"
+                    name="launchpad_url"
+                    placeholder="URL"
+                    value="{{ launchpad_url }}"
                     required
                   />
-                </div>
-                <div class="p-form__group">
-                  <label for="size" class="p-form__label">Size</label>
-                  <div class="p-form__control">
-                    <input
-                      type="number"
-                      class="p-form__input"
-                      id="size"
-                      name="size"
-                      value="{{size}}"
-                      min="1"
-                      max="1000"
-                    />
-                  </div>
                 </div>
                 <div class="p-form__group">
                   <button
                     type="submit"
                     class="p-button--positive u-align--right"
                   >
-                    Search
+                    Submit
                   </button>
                 </div>
               </form>
@@ -101,47 +87,32 @@
           </div>
         </section>
       </div>
-      {% if results %}
+      {% if work %}
       <div class="l-docs__title" id="main-content">
         <div class="p-section--shallow">
           <div class="u-fixed-width">
-            <h1 class="u-no-margin--bottom">Results for "{{ query }}"</h1>
-          </div>
-        </div>
-      </div>
-      <div class="l-docs__main u-fixed-width">
-        {% for merge_proposal in results %}
-        <div class="p-strip is-bordered is-shallow">
-          <div class="row">
-            <div class="col-8">
-              <h3>
-                <a href="{{ merge_proposal.web_link }}">
-                  <p>{{ merge_proposal.web_link }}</p>
+            <h4 class="u-no-margin--bottom">
+              {% if work.status == "COMPLETED" %}
+                <i class="p-icon--success"></i> Success!
+                Here you go, enjoy!
+                <a href="{{ work.github_url }}">
+                  <p>{{ work.github_url }}</p>
                 </a>
-              </h3>
-              <button class="p-chip--information">
-                <span class="p-chip__lead">Date merged:</span>
-                <span class="p-chip__value">{{ merge_proposal.date_merged }}</span>
-              </button>
-              <br>
-              <button class="p-chip">
-                <span class="p-chip__lead">Registrant</span>
-                <span class="p-chip__value">{{ merge_proposal.registrant_name }}</span>
-              </button>
-              <br>
-              <button class="p-chip--positive">
-                <span class="p-chip__lead">Target branch:</span>
-                <span class="p-chip__value">{{ merge_proposal.target_git_path }}</span>
-              </button>
-              <p>
-                {{ merge_proposal.commit_message }}
-              </p>
-            </div>
+              {% endif %}
+              {% if work.status == "FAILED" %}
+                <i class="p-icon--error"></i> Something went wrong. Reach out to r00ta if the problem persists. Thanks!
+              {% endif %}
+              {% if work.status == "NEW" %}
+                <i class="p-icon--spinner u-animation--spin"></i> Processing (might take up to one minute)..
+              {% endif %}
+            </h4>
           </div>
         </div>
-        {% endfor %}
       </div>
       {% endif %}
     </div>
   </body>
+  {% if refresh_page %}
+     <meta http-equiv="refresh" content="5; URL={{ refresh_page }}">
+  {% endif %}
 </html>

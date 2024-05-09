@@ -26,11 +26,12 @@ class DatabaseConfig:
 @dataclass
 class Config:
     db: DatabaseConfig | None
+    secret: str | None = None
     debug_queries: bool = False
     debug: bool = False
 
 
-def read_config() -> Config:
+def read_config(secret: str | None = None) -> Config:
     return Config(
         # TODO: do not hardcode this
         DatabaseConfig(
@@ -40,5 +41,6 @@ def read_config() -> Config:
             "launchpadllm",
             5432
         ),
+        secret=secret,
         debug_queries=False,
         debug=False)

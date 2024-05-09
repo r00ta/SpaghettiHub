@@ -3,6 +3,7 @@ import logging
 
 import uvicorn
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 from transformers import AutoModel, AutoTokenizer
 
 from launchpadllm.common.services.embeddings import EmbeddingsCache
@@ -46,6 +47,10 @@ def make_arg_parser():
                         type=nullable_str,
                         default=None,
                         help="The CA certificates file")
+    parser.add_argument("--secret",
+                        type=str,
+                        required=True,
+                        help="Set the session secret")
     return parser
 
 
@@ -69,6 +74,11 @@ def create_app(config: Config) -> FastAPI:
     )
     app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache)
     app.add_middleware(TransactionMiddleware, db=db)
+    app.add_middleware(
+        SessionMiddleware,
+        same_site="strict",
+        secret_key=config.secret,
+    )
 
     APIBase.register(app.router)
     APIv1.register(app.router)
@@ -79,7 +89,7 @@ def run():
     parser = make_arg_parser()
     args = parser.parse_args()
 
-    app_config = read_config()
+    app_config = read_config(secret=args.secret)
     logging.basicConfig(
         level=logging.INFO
     )
