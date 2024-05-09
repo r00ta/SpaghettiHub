@@ -58,7 +58,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer, server_default=sa.text(
             "nextval('bug_comment_id_seq')"), primary_key=True),
         sa.Column("bug_id", sa.Integer, sa.ForeignKey(
-            "bug.id", ondelete="CASCADE")),
+            "bug.id")),
         sa.Column("text_id", sa.Integer, sa.ForeignKey(
             "text.id", ondelete="CASCADE")),
     )

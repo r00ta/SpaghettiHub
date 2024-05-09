@@ -38,12 +38,15 @@ class BugsService(Service):
                 )
             else:
                 # update the bug
-                await self.texts_service.delete(bug.title_id)
-                await self.texts_service.delete(bug.description_id)
+                old_text_id = bug.title_id
+                old_description_id = bug.description_id
                 bug.title_id = title_text.id
                 bug.description_id = description_text.id
                 bug.date_last_updated = b.bug.date_last_updated
                 await self.bugs_repository.update(bug)
+                await self.texts_service.delete(old_text_id)
+                await self.texts_service.delete(old_description_id)
+
             await self.delete_comments(b.bug.id)
             # skip the first, always equal to the description
             first = True
