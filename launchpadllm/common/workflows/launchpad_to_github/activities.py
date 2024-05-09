@@ -49,7 +49,7 @@ class LaunchpadToGithubActivity(ActivityBase):
             command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror && "
                        "cd /tmp/maas-mirror && "
                        "git remote add lp https://git.launchpad.net/maas && "
-                       "git remote update && "
+                       "git remote update"
                        )
             subprocess.run(command, shell=True)
             activity.heartbeat()
