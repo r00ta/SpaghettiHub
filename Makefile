@@ -1,8 +1,8 @@
 .ONESHELL:
 
-DATABASE_NAME := launchpadllm
-DATABASE_USER := launchpadllm
-DATABASE_PASSWORD := launchpadllm
+DATABASE_NAME := spaghettihub
+DATABASE_USER := spaghettihub
+DATABASE_PASSWORD := spaghettihub
 
 THIS_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
@@ -37,8 +37,8 @@ setup-temporal-database:
 	export SQL_PLUGIN=postgres
 	export SQL_HOST=localhost
 	export SQL_PORT=5432
-	export SQL_USER=launchpadllm
-	export SQL_PASSWORD=launchpadllm
+	export SQL_USER=spaghettihubm
+	export SQL_PASSWORD=spaghettihubm
 
 	sudo -u postgres psql -c "ALTER USER $(DATABASE_USER) WITH SUPERUSER;"
 	/opt/temporal/temporal-sql-tool --database temporal create-database
@@ -63,18 +63,18 @@ create-temporal-namespace:
 	/opt/temporal/tctl --ns default namespace register -rd 3
 
 prod-create-daemons:
-	sudo cp $(THIS_DIR)prod/daemons/launchpadllmserver.service /etc/systemd/system/launchpadllmserver.service
-	sudo cp $(THIS_DIR)prod/daemons/launchpadllmupdate.service /etc/systemd/system/launchpadllmupdate.service
-	sudo cp $(THIS_DIR)prod/daemons/launchpadllmworker.service /etc/systemd/system/launchpadllmworker.service
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubserver.service /etc/systemd/system/spaghettihubserver.service
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubupdate.service /etc/systemd/system/spaghettihubmpupdate.service
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubworker.service /etc/systemd/system/spaghettihubworker.service
 	sudo cp $(THIS_DIR)prod/daemons/temporal.service /etc/systemd/system/temporal.service
 	sudo systemctl daemon-reload
-	sudo systemctl enable launchpadllmserver.service
-	sudo systemctl enable launchpadllmupdate.service
-	sudo systemctl enable launchpadllmworker.service
+	sudo systemctl enable spaghettihubserver.service
+	sudo systemctl enable spaghettihubupdate.service
+	sudo systemctl enable spaghettihubworker.service
 	sudo systemctl enable temporal.service
-	sudo systemctl start launchpadllmserver.service
-	sudo systemctl start launchpadllmupdate.service
-	sudo systemctl start launchpadllmworker.service
+	sudo systemctl start spaghettihubserver.service
+	sudo systemctl start spaghettihubmpudate.service
+	sudo systemctl start spaghettihubworker.service
 	sudo systemctl start temporal.service
 
 
@@ -93,9 +93,9 @@ dev-start-temporal:
 
 dev-sort:
 	. $(THIS_DIR)ve/bin/activate
-	isort alembic $(THIS_DIR)launchpadllm
+	isort alembic $(THIS_DIR)spaghettihub
 
 dev-format:
 	. $(THIS_DIR)ve/bin/activate
-	autopep8 --in-place -r $(THIS_DIR)launchpadllm
+	autopep8 --in-place -r $(THIS_DIR)spaghettihub
 	autopep8 --in-place -r $(THIS_DIR)alembic

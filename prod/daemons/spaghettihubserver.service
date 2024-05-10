@@ -1,0 +1,14 @@
+# Place me under /etc/systemd/system/spaghettihubserver.service
+[Unit]
+Description=LaunchpadLLM Service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/spaghettihub
+ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubserver --port 1443 --ssl-keyfile REDACTED --ssl-certfile REDACTED --secret REDACTED"
+Restart=always
+RestartSec=15
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

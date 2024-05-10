@@ -1,11 +1,10 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='launchpadllm',
+    name='spaghettihub',
     version='0.0.1',
     author='Jacopo Rota',
-    description='CLI to print the top 10 deb packages that have the most files associated '
-                'with them for a certain architecture.',
+    description='My productivity tools for Launchpad and GitHub',
     python_requires='>=3.10',
     packages=find_packages(),
     include_package_data=True,
@@ -15,10 +14,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'lauchpadllm=launchpadllm.training.main:main',
-            'launchpadmp=launchpadllm.training.merge_proposals:main',
-            'launchpadllmserver=launchpadllm.server.main:run',
-            'launchpadllmworker=launchpadllm.worker.main:run'
+            'spaghettihubtraining=spaghettihub.training.main:main',
+            'spaghettihubmergeproposals=spaghettihub.training.merge_proposals:main',
+            'spaghettihubserver=spaghettihub.server.main:run',
+            'spaghettihubworker=spaghettihub.worker.main:run'
         ],
     },
 )

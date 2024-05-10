@@ -2,10 +2,10 @@ version: '3.2'
 services:
   db:
     image: library/postgres:13.1
-    container_name: launchpadllm-postgres
+    container_name: spaghettihub-postgres
     environment:
-      POSTGRES_USER: launchpadllm
-      POSTGRES_PASSWORD: launchpadllm
-      POSTGRES_DB: launchpadllm
+      POSTGRES_USER: spaghettihub
+      POSTGRES_PASSWORD: spaghettihub
+      POSTGRES_DB: spaghettihub
     ports:
       - "5432:5432"

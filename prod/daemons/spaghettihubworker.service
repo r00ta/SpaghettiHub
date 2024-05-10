@@ -1,0 +1,14 @@
+# Place me under /etc/systemd/system/spaghettihubworker.service
+[Unit]
+Description=SpaghettiHub temporal worker Service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/spaghettihub
+ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubworker --gh_token REDACTED"
+Restart=always
+RestartSec=15
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
