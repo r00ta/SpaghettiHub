@@ -73,7 +73,7 @@ prod-create-daemons:
 	sudo systemctl enable spaghettihubworker.service
 	sudo systemctl enable temporal.service
 	sudo systemctl start spaghettihubserver.service
-	sudo systemctl start spaghettihubmpudate.service
+	sudo systemctl start spaghettihubmpupdate.service
 	sudo systemctl start spaghettihubworker.service
 	sudo systemctl start temporal.service
 
