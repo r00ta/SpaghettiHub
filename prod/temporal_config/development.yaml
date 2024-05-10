@@ -13,8 +13,8 @@ persistence:
         databaseName: "temporal"
         connectAddr: "127.0.0.1:5432"
         connectProtocol: "tcp"
-        user: "launchpadllm"
-        password: "launchpadllm"
+        user: "spaghettihub"
+        password: "spaghettihub"
         maxConns: 20
         maxIdleConns: 20
         maxConnLifetime: "1h"
@@ -24,8 +24,8 @@ persistence:
         databaseName: "temporal_visibility"
         connectAddr: "127.0.0.1:5432"
         connectProtocol: "tcp"
-        user: "launchpadllm"
-        password: "launchpadllm"
+        user: "spaghettihub"
+        password: "spaghettihub"
         maxConns: 2
         maxIdleConns: 2
         maxConnLifetime: "1h"

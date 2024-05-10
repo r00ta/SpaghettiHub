@@ -64,12 +64,12 @@ create-temporal-namespace:
 
 prod-create-daemons:
 	sudo cp $(THIS_DIR)prod/daemons/spaghettihubserver.service /etc/systemd/system/spaghettihubserver.service
-	sudo cp $(THIS_DIR)prod/daemons/spaghettihubupdate.service /etc/systemd/system/spaghettihubmpupdate.service
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubmpupdate.service /etc/systemd/system/spaghettihubmpupdate.service
 	sudo cp $(THIS_DIR)prod/daemons/spaghettihubworker.service /etc/systemd/system/spaghettihubworker.service
 	sudo cp $(THIS_DIR)prod/daemons/temporal.service /etc/systemd/system/temporal.service
 	sudo systemctl daemon-reload
 	sudo systemctl enable spaghettihubserver.service
-	sudo systemctl enable spaghettihubupdate.service
+	sudo systemctl enable spaghettihubmpupdate.service
 	sudo systemctl enable spaghettihubworker.service
 	sudo systemctl enable temporal.service
 	sudo systemctl start spaghettihubserver.service

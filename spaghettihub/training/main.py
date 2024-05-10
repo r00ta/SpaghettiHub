@@ -131,7 +131,7 @@ async def async_main():
     )
     args = parser.parse_args()
 
-    dsn = "postgresql+asyncpg://launchpadllm:launchpadllm@localhost:5432/launchpadllm"
+    dsn = "postgresql+asyncpg://spaghettihub:spaghettihub@localhost:5432/spaghettihub"
     engine = create_async_engine(
         dsn
     )

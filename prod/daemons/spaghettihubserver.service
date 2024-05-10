@@ -1,6 +1,6 @@
 # Place me under /etc/systemd/system/spaghettihubserver.service
 [Unit]
-Description=LaunchpadLLM Service
+Description=SpaghettiHub Service
 
 [Service]
 User=ubuntu
