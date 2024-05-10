@@ -56,6 +56,7 @@ class LaunchpadToGithubActivity(ActivityBase):
 
         update_command = ("cd /tmp/maas-mirror && "
                           "git fetch lp && "
+                          "git fetch origin && "
                           "git merge lp/master --no-ff --no-edit && "
                           "git push origin master"
                           )
