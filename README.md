@@ -2,4 +2,6 @@
 
 This is a collection of tools that I use to improve my productivity and the quality of my work. Contributions are welcome!
 
-Instructions will follow. 
+## Development instructions
+
+See [Development](DEVELOPMENT.md)
