@@ -37,8 +37,8 @@ setup-temporal-database:
 	export SQL_PLUGIN=postgres
 	export SQL_HOST=localhost
 	export SQL_PORT=5432
-	export SQL_USER=spaghettihubm
-	export SQL_PASSWORD=spaghettihubm
+	export SQL_USER=spaghettihub
+	export SQL_PASSWORD=spaghettihub
 
 	sudo -u postgres psql -c "ALTER USER $(DATABASE_USER) WITH SUPERUSER;"
 	/opt/temporal/temporal-sql-tool --database temporal create-database

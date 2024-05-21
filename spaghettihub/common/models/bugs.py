@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
+from sqlalchemy.orm import mapped_column
 
+from spaghettihub.common.models.base import OneToOne
 from spaghettihub.common.models.texts import MyText
 
 
@@ -11,17 +13,14 @@ class Bug(BaseModel):
     date_created: datetime
     date_last_updated: datetime
     web_link: str
-    title_id: int
-    title: MyText | None = None
-    description_id: int
-    description: MyText | None = None
+    title: OneToOne[MyText]
+    description: OneToOne[MyText]
 
 
 class BugComment(BaseModel):
     id: int
-    text_id: int
-    text: MyText | None = None
-    bug_id: int
+    text: OneToOne[MyText]
+    bug: OneToOne[Bug]
 
 
 class BugCommentWithScore(BaseModel):

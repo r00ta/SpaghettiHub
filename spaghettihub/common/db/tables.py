@@ -40,7 +40,7 @@ BugCommentTable = Table(
     "bug_comment",
     METADATA,
     Column("id", Integer, BugCommentSequence, primary_key=True),
-    Column("bug_id", Integer, ForeignKey("bug.id", ondelete="CASCADE")),
+    Column("bug_id", Integer, ForeignKey("bug.id")),
     Column("text_id", Integer, ForeignKey("text.id", ondelete="CASCADE")),
 )
 

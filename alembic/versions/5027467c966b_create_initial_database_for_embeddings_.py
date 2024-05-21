@@ -75,8 +75,8 @@ def upgrade() -> None:
             "nextval('merge_proposals_id_seq')"), primary_key=True),
         sa.Column("date_merged", sa.DateTime(timezone=True), nullable=False),
         sa.Column("commit_message", sa.Text, nullable=True),
-        sa.Column("source_git_path", sa.Text, nullable=False),
-        sa.Column("target_git_path", sa.Text, nullable=False),
+        sa.Column("source_git_path", sa.Text, nullable=True),
+        sa.Column("target_git_path", sa.Text, nullable=True),
         sa.Column("registrant_name", sa.Text, nullable=False),
         sa.Column("web_link", sa.Text, nullable=False),
     )

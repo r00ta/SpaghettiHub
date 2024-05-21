@@ -7,7 +7,7 @@ from spaghettihub.common.db.repository import BaseRepository
 from spaghettihub.common.db.sequences import BugCommentSequence
 from spaghettihub.common.db.tables import (BugCommentTable, BugTable,
                                            MyTextTable)
-from spaghettihub.common.models.base import ListResult
+from spaghettihub.common.models.base import ListResult, OneToOne
 from spaghettihub.common.models.bugs import Bug, BugComment
 from spaghettihub.common.models.texts import MyText
 
@@ -38,13 +38,17 @@ class BugsRepository(BaseRepository[Bug]):
                 date_created=entity.date_created,
                 date_last_updated=entity.date_last_updated,
                 web_link=entity.web_link,
-                title_id=entity.title_id,
-                description_id=entity.description_id,
+                title_id=entity.title.id,
+                description_id=entity.description.id,
             )
         )
         result = await self.connection_provider.get_current_connection().execute(stmt)
         bug = result.one()
-        return Bug(**bug._asdict())
+        return Bug(
+            title=OneToOne[MyText](id=entity.title.id),
+            description=OneToOne[MyText](id=entity.description.id),
+            **bug._asdict()
+        )
 
     async def find_by_id(self, id: int) -> Optional[Bug]:
         stmt = select("*").select_from(BugTable).where(BugTable.c.id == id)
@@ -52,7 +56,11 @@ class BugsRepository(BaseRepository[Bug]):
         bug = result.first()
         if not bug:
             return None
-        return Bug(**bug._asdict())
+        return Bug(
+            title=OneToOne[MyText](id=bug.title_id),
+            description=OneToOne[MyText](id=bug.description_id),
+            **bug._asdict()
+        )
 
     async def find_by_text_id(self, id: int) -> Optional[Bug]:
         title_cte = (
@@ -114,9 +122,10 @@ class BugsRepository(BaseRepository[Bug]):
         if not bug:
             return None
         return Bug(
-            title=MyText(id=bug.title_id, content=bug.title_content),
-            description=MyText(id=bug.description_id,
-                               content=bug.description_content),
+            title=OneToOne[MyText](id=bug.title_id, ref=MyText(
+                id=bug.title_id, content=bug.title_content)),
+            description=OneToOne[MyText](id=bug.description_id, ref=MyText(
+                id=bug.description_id, content=bug.description_content)),
             **bug._asdict()
         )
 
@@ -128,8 +137,8 @@ class BugsRepository(BaseRepository[Bug]):
             update(BugTable)
             .where(BugTable.c.id == entity.id)
             .values(
-                title_id=entity.title_id,
-                description_id=entity.description_id,
+                title_id=entity.title.id,
+                description_id=entity.description.id,
                 date_last_updated=entity.date_last_updated,
                 web_link=entity.web_link
             )
@@ -158,13 +167,12 @@ class BugsRepository(BaseRepository[Bug]):
             )
             .values(
                 id=entity.id,
-                text_id=entity.text_id,
-                bug_id=entity.bug_id,
+                text_id=entity.text.id,
+                bug_id=entity.bug.id,
             )
         )
-        result = await self.connection_provider.get_current_connection().execute(stmt)
-        bug_comment = result.one()
-        return BugComment(**bug_comment._asdict())
+        await self.connection_provider.get_current_connection().execute(stmt)
+        return entity
 
     async def find_bug_comments(self, bug_id: int) -> List[BugComment]:
         stmt = (select(
@@ -175,14 +183,18 @@ class BugsRepository(BaseRepository[Bug]):
         )
             .select_from(BugCommentTable)
             .join(
-            MyTextTable,
-            MyTextTable.c.id == BugCommentTable.c.text_id
+                MyTextTable,
+                MyTextTable.c.id == BugCommentTable.c.text_id
         )
             .where(
-            BugCommentTable.c.bug_id == bug_id,
+                BugCommentTable.c.bug_id == bug_id,
         )
         )
         result = await self.connection_provider.get_current_connection().execute(stmt)
         return [BugComment(
-                text=MyText(id=bug_comment.id, content=bug_comment.content),
-                **bug_comment._asdict()) for bug_comment in result.all()]
+            text=OneToOne[MyText](id=bug_comment.text_id, ref=MyText(id=bug_comment.text_id,
+                                                                     content=bug_comment.content)),
+            bug=OneToOne[Bug](id=bug_comment.bug_id),
+            **bug_comment._asdict()
+        ) for bug_comment in result.all()
+        ]

@@ -116,12 +116,12 @@
             <div class="col-8">
               <h3>
                 <a href="{{ issue.bug.web_link }}">
-                  <p>{{ issue.bug.title.content }}</p>
+                  <p>{{ issue.bug.title.ref.content }}</p>
                 </a>
                 <span class="score">(Score: {{ issue.title_score }})</span>
               </h3>
               <p>
-                {{ issue.bug.description.content }}
+                {{ issue.bug.description.ref.content }}
                 <span class="score"
                   >(Score: {{ issue.description_score }})</span
                 >
@@ -135,7 +135,7 @@
                           Comment #{{ loop.index }}
                           <span class="score">(Score: {{ comment.score }})</span>
                         </h5>
-                        <p>{{ comment.bug_comment.text.content }}</p>
+                        <p>{{ comment.bug_comment.text.ref.content }}</p>
                       </div>
                     </div>
                 {% endfor %}

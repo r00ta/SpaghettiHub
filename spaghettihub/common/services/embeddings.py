@@ -5,6 +5,7 @@ from numpy.linalg import norm
 
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.embeddings import EmbeddingsRepository
+from spaghettihub.common.models.base import OneToOne
 from spaghettihub.common.models.bugs import (Bug, BugCommentWithScore,
                                              BugWithCommentsAndScores)
 from spaghettihub.common.models.embeddings import Embedding
@@ -59,7 +60,7 @@ class EmbeddingsService(Service):
         return await self.embeddings_repository.create(
             Embedding(
                 id=await self.embeddings_repository.get_next_id(),
-                text_id=text.id,
+                text=OneToOne[MyText](id=text.id),
                 embedding=embedding.tobytes(),
             )
         )
@@ -73,15 +74,13 @@ class EmbeddingsService(Service):
         return embeddings.cpu().detach().numpy()[0]
 
     async def find_similar_issues(self, search: str, limit: int) -> List[BugWithCommentsAndScores]:
-        top_scores = []
-        matching_issues = []
         embedding = await self.generate(self.embeddings_cache.get_tokenizer(), self.embeddings_cache.get_model(), search)
         if not self.embeddings_cache.get_cache():
             embeddings_cache_size = await self.embeddings_repository.list(1, 1)
             all_embeddings = await self.embeddings_repository.list(embeddings_cache_size.total, 1)
             self.embeddings_cache.set_cache(
                 {
-                    x.text_id: np.frombuffer(x.embedding, dtype=np.float32) for x in all_embeddings.items
+                    x.text.id: np.frombuffer(x.embedding, dtype=np.float32) for x in all_embeddings.items
                 }
             )
 
@@ -90,27 +89,26 @@ class EmbeddingsService(Service):
              for text_id, e in self.embeddings_cache.get_cache().items()),
             reverse=True
         )
-        unique_bugs = set()
-        unique_bugs_list = []
+
+        unique_bugs = {}
         for similarity, text_id in scores:
             bug = await self.bugs_service.find_bug_by_text_id(text_id)
-            top_scores.append((text_id, str(similarity)))
-            unique_bugs.add(bug.id)
-            unique_bugs_list.append(bug)
-            if len(unique_bugs) == limit:
+            unique_bugs[bug.id] = bug
+            if len(unique_bugs.keys()) == limit:
                 break
 
+        matching_issues = []
         text_id_to_score = {text_id: score for score, text_id in scores}
-        for bug in unique_bugs_list:
+        for bug in unique_bugs.values():
             bug_comments = await self.bugs_service.get_bug_comments(bug.id)
             bug_with_score = BugWithCommentsAndScores(
                 bug=bug,
-                title_score=text_id_to_score[bug.title_id],
-                description_score=text_id_to_score[bug.description_id],
+                title_score=text_id_to_score[bug.title.id],
+                description_score=text_id_to_score[bug.description.id],
                 comments=[
                     BugCommentWithScore(
                         bug_comment=bug_comment,
-                        score=text_id_to_score[bug_comment.text_id],
+                        score=text_id_to_score[bug_comment.text.id],
                     )
                     for bug_comment in bug_comments
                 ]

@@ -7,8 +7,9 @@ from sqlalchemy.sql.operators import eq
 from spaghettihub.common.db.repository import BaseRepository
 from spaghettihub.common.db.sequences import EmbeddingSequence
 from spaghettihub.common.db.tables import EmbeddingTable
-from spaghettihub.common.models.base import ListResult
+from spaghettihub.common.models.base import ListResult, OneToOne
 from spaghettihub.common.models.embeddings import Embedding
+from spaghettihub.common.models.texts import MyText
 
 
 class EmbeddingsRepository(BaseRepository[Embedding]):
@@ -26,11 +27,14 @@ class EmbeddingsRepository(BaseRepository[Embedding]):
                 EmbeddingTable.c.text_id,
                 EmbeddingTable.c.embedding,
             )
-            .values(id=entity.id, text_id=entity.text_id, embedding=entity.embedding)
+            .values(id=entity.id, text_id=entity.text.id, embedding=entity.embedding)
         )
         result = await self.connection_provider.get_current_connection().execute(stmt)
         embedding = result.one()
-        return Embedding(**embedding._asdict())
+        return Embedding(
+            text=OneToOne[MyText](id=embedding.text_id),
+            **embedding._asdict()
+        )
 
     async def find_by_id(self, id: int) -> Optional[Embedding]:
         stmt = select(
@@ -39,7 +43,10 @@ class EmbeddingsRepository(BaseRepository[Embedding]):
         embedding = result.first()
         if not embedding:
             return None
-        return Embedding(**embedding._asdict())
+        return Embedding(
+            text=OneToOne[MyText](id=embedding.text_id),
+            **embedding._asdict()
+        )
 
     async def list(self, size: int, page: int) -> ListResult[Embedding]:
         total_stmt = select(count()).select_from(EmbeddingTable)
@@ -55,7 +62,13 @@ class EmbeddingsRepository(BaseRepository[Embedding]):
 
         result = await self.connection_provider.get_current_connection().execute(stmt)
         return ListResult[Embedding](
-            items=[Embedding(**row._asdict()) for row in result.all()],
+            items=[
+                Embedding(
+                    text=OneToOne[MyText](id=row.text_id),
+                    **row._asdict()
+                )
+                for row in result.all()
+            ],
             total=total
         )
 

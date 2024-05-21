@@ -2,7 +2,9 @@ from typing import List, Optional
 
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.bugs import BugsRepository
+from spaghettihub.common.models.base import OneToOne
 from spaghettihub.common.models.bugs import Bug, BugComment
+from spaghettihub.common.models.texts import MyText
 from spaghettihub.common.services.base import Service
 from spaghettihub.common.services.texts import TextsService
 
@@ -32,16 +34,16 @@ class BugsService(Service):
                         date_created=b.bug.date_created,
                         date_last_updated=b.bug.date_last_updated,
                         web_link=b.bug.web_link,
-                        title_id=title_text.id,
-                        description_id=description_text.id,
+                        title=OneToOne[MyText](id=title_text.id),
+                        description=OneToOne[MyText](id=description_text.id),
                     )
                 )
             else:
                 # update the bug
-                old_text_id = bug.title_id
-                old_description_id = bug.description_id
-                bug.title_id = title_text.id
-                bug.description_id = description_text.id
+                old_text_id = bug.title.id
+                old_description_id = bug.description.id
+                bug.title.set_id(title_text.id)
+                bug.description.set_id(description_text.id)
                 bug.date_last_updated = b.bug.date_last_updated
                 await self.bugs_repository.update(bug)
                 await self.texts_service.delete(old_text_id)
@@ -65,8 +67,8 @@ class BugsService(Service):
         return await self.bugs_repository.add_comment(
             BugComment(
                 id=await self.bugs_repository.get_next_comment_id(),
-                bug_id=bug_id,
-                text_id=comment_text.id,
+                bug=OneToOne[Bug](id=bug_id),
+                text=OneToOne[MyText](id=comment_text.id),
             )
         )
 

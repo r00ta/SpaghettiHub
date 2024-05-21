@@ -64,10 +64,11 @@ async def update_database(args, engine):
         async with conn.begin():
             connection_provider.current_connection = conn
             last_updated = await services.last_update_service.get_last_update()
+    last_updated = datetime.datetime.utcnow() - datetime.timedelta(days=4)
     if last_updated:
-        tqdm.write(f"Last update: {last_updated.last_updated}")
+        tqdm.write(f"Last update: {last_updated}")
         new_bugs = project.searchTasks(
-            status=BUG_STATES, created_since=last_updated.last_updated
+            status=BUG_STATES, created_since=last_updated
         )
 
         if len(new_bugs) == 0:
@@ -81,7 +82,7 @@ async def update_database(args, engine):
 
         modified_bugs = (
             project.searchTasks(
-                status=BUG_STATES, modified_since=last_updated.last_updated
+                status=BUG_STATES, modified_since=last_updated
             ),
         )
         if len(modified_bugs) == 0:
