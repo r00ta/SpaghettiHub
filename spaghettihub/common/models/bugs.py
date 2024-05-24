@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
-from sqlalchemy.orm import mapped_column
 
-from spaghettihub.common.models.base import OneToOne
+from spaghettihub.common.models.base import OneToMany, OneToOne
 from spaghettihub.common.models.texts import MyText
 
 
@@ -15,6 +14,7 @@ class Bug(BaseModel):
     web_link: str
     title: OneToOne[MyText]
     description: OneToOne[MyText]
+    comments: OneToMany["BugComment"] | None = None
 
 
 class BugComment(BaseModel):

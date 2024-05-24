@@ -63,7 +63,6 @@ class LaunchpadToGithubActivity(ActivityBase):
         subprocess.run(update_command, shell=True)
 
         @activity.defn(name="update-github-master-branch")
-
     @activity.defn(name="update-github-fork-master-branch")
     async def update_github_fork_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror-fork"):
@@ -82,7 +81,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                           "git push origin master"
                           )
         subprocess.run(update_command, shell=True)
-    
+
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> str:
         command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror-fork {params.target_dir}"
