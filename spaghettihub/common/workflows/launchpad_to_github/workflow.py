@@ -66,8 +66,15 @@ class TemporalInternalLaunchpadToGithubWorkflow:
             request_dir,
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)
+        )        
+        
+        await workflow.execute_activity(
+            "update-github-fork-master-branch",
+            request_dir,
+            start_to_close_timeout=timedelta(seconds=60),
+            heartbeat_timeout=timedelta(seconds=60)
         )
-
+        
         await workflow.execute_activity(
             "create-github-branch-for-pull-request",
             ActivityCreateGithubBranchForPullRequestParams(
