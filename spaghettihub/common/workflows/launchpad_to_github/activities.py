@@ -92,7 +92,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                 "Authorization": f"Bearer {self.gh_token}",
                 "X-GitHub-Api-Version": "2022-11-28"
             }
-            async with session.post("https://api.github.com/repos/SpaghettiHub/maas/pulls",
+            async with session.post("https://api.github.com/orgs/SpaghettiHub/repos/maas/pulls",
                                     json=json_body,
                                     headers=headers
                                     ) as response:
