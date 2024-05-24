@@ -65,7 +65,7 @@ class LaunchpadToGithubActivity(ActivityBase):
     @activity.defn(name="update-github-fork-master-branch")
     async def update_github_fork_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror-fork"):
-            command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror && "
+            command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror-fork && "
                        "cd /tmp/maas-mirror-fork && "
                        "git remote add lp https://git.launchpad.net/maas && "
                        "git remote update"
