@@ -62,7 +62,6 @@ class LaunchpadToGithubActivity(ActivityBase):
                           )
         subprocess.run(update_command, shell=True)
 
-        @activity.defn(name="update-github-master-branch")
     @activity.defn(name="update-github-fork-master-branch")
     async def update_github_fork_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror-fork"):
