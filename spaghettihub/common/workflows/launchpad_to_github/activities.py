@@ -46,7 +46,7 @@ class LaunchpadToGithubActivity(ActivityBase):
     @activity.defn(name="update-github-master-branch")
     async def update_github_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror"):
-            command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror && "
+            command = ("git clone git@github.com:SpaghettiHub/maas.git /tmp/maas-mirror && "
                        "cd /tmp/maas-mirror && "
                        "git remote add lp https://git.launchpad.net/maas && "
                        "git remote update"
@@ -62,9 +62,30 @@ class LaunchpadToGithubActivity(ActivityBase):
                           )
         subprocess.run(update_command, shell=True)
 
+        @activity.defn(name="update-github-master-branch")
+
+    @activity.defn(name="update-github-fork-master-branch")
+    async def update_github_fork_master_branch(self, target_dir: str) -> None:
+        if not os.path.exists("/tmp/maas-mirror-fork"):
+            command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror && "
+                       "cd /tmp/maas-mirror-fork && "
+                       "git remote add lp https://git.launchpad.net/maas && "
+                       "git remote update"
+                       )
+            subprocess.run(command, shell=True)
+            activity.heartbeat()
+
+        update_command = ("cd /tmp/maas-mirror-fork && "
+                          "git fetch lp && "
+                          "git fetch origin && "
+                          "git merge lp/master --no-ff --no-edit && "
+                          "git push origin master"
+                          )
+        subprocess.run(update_command, shell=True)
+    
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> str:
-        command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror {params.target_dir}"
+        command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror-fork {params.target_dir}"
         subprocess.run(command, shell=True)
         activity.heartbeat()
 
@@ -72,7 +93,7 @@ class LaunchpadToGithubActivity(ActivityBase):
             temp_dir = Path(tmpdirname)
             diff_file = temp_dir / "patch.diff"
             diff_file.write_text(params.diff)
-            command = (f"cd {params.target_dir}maas-mirror && "
+            command = (f"cd {params.target_dir}maas-mirror-fork && "
                        f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                        f"git apply {str(diff_file)} && "
                        f"git add * && git commit -m 'enjoy this from r00ta' && git push origin {params.request_uuid}")
