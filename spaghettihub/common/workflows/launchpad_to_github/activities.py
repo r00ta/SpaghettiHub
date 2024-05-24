@@ -46,7 +46,7 @@ class LaunchpadToGithubActivity(ActivityBase):
     @activity.defn(name="update-github-master-branch")
     async def update_github_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror"):
-            command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror && "
+            command = ("git clone git@github.com:SpaghettiHub/maas.git /tmp/maas-mirror && "
                        "cd /tmp/maas-mirror && "
                        "git remote add lp https://git.launchpad.net/maas && "
                        "git remote update"
@@ -92,7 +92,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                 "Authorization": f"Bearer {self.gh_token}",
                 "X-GitHub-Api-Version": "2022-11-28"
             }
-            async with session.post("https://api.github.com/repos/r00tabot/maas/pulls",
+            async with session.post("https://api.github.com/repos/SpaghettiHub/maas/pulls",
                                     json=json_body,
                                     headers=headers
                                     ) as response:
