@@ -67,16 +67,16 @@ class LaunchpadToGithubActivity(ActivityBase):
         if not os.path.exists("/tmp/maas-mirror-fork"):
             command = ("git clone git@github.com:r00tabot/maas.git /tmp/maas-mirror-fork && "
                        "cd /tmp/maas-mirror-fork && "
-                       "git remote add lp https://git.launchpad.net/maas && "
+                       "git remote add mirror git@github.com:SpaghettiHub/maas.git && "
                        "git remote update"
                        )
             subprocess.run(command, shell=True)
             activity.heartbeat()
 
         update_command = ("cd /tmp/maas-mirror-fork && "
-                          "git fetch lp && "
+                          "git fetch mirror && "
                           "git fetch origin && "
-                          "git merge lp/master --no-ff --no-edit && "
+                          "git merge mirror/master --no-ff --no-edit && "
                           "git push origin master"
                           )
         subprocess.run(update_command, shell=True)
