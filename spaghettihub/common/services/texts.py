@@ -9,7 +9,7 @@ from spaghettihub.common.services.base import Service
 class TextsService(Service):
 
     def __init__(
-        self, connection_provider: ConnectionProvider, texts_repository: TextsRepository
+            self, connection_provider: ConnectionProvider, texts_repository: TextsRepository
     ):
         super().__init__(connection_provider)
         self.texts_repository = texts_repository

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from pydantic import BaseModel
-
 from spaghettihub.common.models.merge_proposals import MergeProposal
 from spaghettihub.server.v1.api.models.responses.base import (
     BaseResponse, PaginatedResponse)

@@ -1,17 +1,12 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from temporalio.client import Client
 
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.github import LaunchpadToGithubWorkRepository
-from spaghettihub.common.db.last_update import LastUpdateRepository
-from spaghettihub.common.db.merge_proposals import MergeProposalsRepository
-from spaghettihub.common.models.base import ListResult
 from spaghettihub.common.models.github import LaunchpadToGithubWork
-from spaghettihub.common.models.last_update import LastUpdate
-from spaghettihub.common.models.merge_proposals import MergeProposal
 from spaghettihub.common.services.base import Service
 from spaghettihub.common.workflows.constants import TASK_QUEUE_NAME
 from spaghettihub.common.workflows.launchpad_to_github.params import \
@@ -23,7 +18,7 @@ class LaunchpadToGithubWorkService(Service):
     def __init__(
             self,
             connection_provider: ConnectionProvider,
-        launchpad_to_github_work_repository: LaunchpadToGithubWorkRepository
+            launchpad_to_github_work_repository: LaunchpadToGithubWorkRepository
     ):
         super().__init__(connection_provider)
         self.launchpad_to_github_work_repository = launchpad_to_github_work_repository

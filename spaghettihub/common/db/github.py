@@ -1,18 +1,12 @@
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy import delete, insert, select, update
-from sqlalchemy.sql.operators import eq, or_
 
 from spaghettihub.common.db.repository import BaseRepository
-from spaghettihub.common.db.sequences import (BugCommentSequence,
-                                              LaunchpadToGithubWorkSequence)
-from spaghettihub.common.db.tables import (BugCommentTable, BugTable,
-                                           LaunchpadToGithubWorkTable,
-                                           MyTextTable)
+from spaghettihub.common.db.sequences import (LaunchpadToGithubWorkSequence)
+from spaghettihub.common.db.tables import (LaunchpadToGithubWorkTable)
 from spaghettihub.common.models.base import ListResult
-from spaghettihub.common.models.bugs import Bug, BugComment
 from spaghettihub.common.models.github import LaunchpadToGithubWork
-from spaghettihub.common.models.texts import MyText
 
 
 class LaunchpadToGithubWorkRepository(BaseRepository[LaunchpadToGithubWork]):

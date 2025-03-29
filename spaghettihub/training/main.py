@@ -2,8 +2,6 @@ import argparse
 import asyncio
 import datetime
 import multiprocessing
-import time
-from functools import partial
 
 from launchpadlib.launchpad import Launchpad
 from sqlalchemy.ext.asyncio import create_async_engine

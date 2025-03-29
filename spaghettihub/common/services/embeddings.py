@@ -6,7 +6,7 @@ from numpy.linalg import norm
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.embeddings import EmbeddingsRepository
 from spaghettihub.common.models.base import OneToOne
-from spaghettihub.common.models.bugs import (Bug, BugCommentWithScore,
+from spaghettihub.common.models.bugs import (BugCommentWithScore,
                                              BugWithCommentsAndScores)
 from spaghettihub.common.models.embeddings import Embedding
 from spaghettihub.common.models.texts import MyText
@@ -37,12 +37,12 @@ class EmbeddingsCache:
 class EmbeddingsService(Service):
 
     def __init__(
-        self,
-        connection_provider: ConnectionProvider,
-        embeddings_repository: EmbeddingsRepository,
-        texts_service: TextsService,
-        bugs_service: BugsService,
-        embeddings_cache: EmbeddingsCache | None = None
+            self,
+            connection_provider: ConnectionProvider,
+            embeddings_repository: EmbeddingsRepository,
+            texts_service: TextsService,
+            bugs_service: BugsService,
+            embeddings_cache: EmbeddingsCache | None = None
     ):
         super().__init__(connection_provider)
         self.embeddings_repository = embeddings_repository
@@ -54,7 +54,7 @@ class EmbeddingsService(Service):
         return np.dot(a, b) / (norm(a) * norm(b))
 
     async def generate_and_store_embedding(
-        self, tokenizer, model, text: MyText
+            self, tokenizer, model, text: MyText
     ) -> Embedding:
         embedding = await self.generate(tokenizer, model, text.content)
         return await self.embeddings_repository.create(

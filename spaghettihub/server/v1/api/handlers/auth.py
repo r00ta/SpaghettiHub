@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import Depends, Form, HTTPException
+from fastapi import Depends, Form
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse

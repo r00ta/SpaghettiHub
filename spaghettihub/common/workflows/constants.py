@@ -1,1 +1,1 @@
-TASK_QUEUE_NAME = "launchpad-to-github-task-queue"
+TASK_QUEUE_NAME = "default-task-queue"

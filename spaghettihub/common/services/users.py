@@ -10,9 +10,9 @@ from spaghettihub.common.services.base import Service
 class UsersService(Service):
 
     def __init__(
-        self,
-        connection_provider: ConnectionProvider,
-        users_repository: UsersRepository
+            self,
+            connection_provider: ConnectionProvider,
+            users_repository: UsersRepository
     ):
         super().__init__(connection_provider)
         self.users_repository = users_repository

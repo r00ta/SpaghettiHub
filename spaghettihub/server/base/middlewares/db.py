@@ -1,15 +1,12 @@
-import time
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
+from typing import AsyncIterator, Awaitable, Callable
 
 from fastapi import Request, Response
-from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncConnection
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from spaghettihub.common.db.base import ConnectionProvider
-from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.server.base.db.database import Database
 
 
@@ -31,9 +28,9 @@ class TransactionMiddleware(BaseHTTPMiddleware):
                 yield conn
 
     async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]],
+            self,
+            request: Request,
+            call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         async with self.get_connection() as conn:
             request.state.conn = conn

@@ -1,4 +1,3 @@
-
 from spaghettihub.common.db.base import ConnectionProvider
 
 

@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 from sqlalchemy import delete, insert, select, update
-from sqlalchemy.sql.operators import eq, or_
 
 from spaghettihub.common.db.repository import BaseRepository
 from spaghettihub.common.db.sequences import BugCommentSequence
@@ -99,19 +98,19 @@ class BugsRepository(BaseRepository[Bug]):
             BugTable.c.description_id,
             description_cte.c.content.label("description_content")
         )
-            .select_from(BugTable)
-            .join(BugCommentTable,
-                  BugCommentTable.c.bug_id == BugTable.c.id,
-                  isouter=True)
-            .join(
+        .select_from(BugTable)
+        .join(BugCommentTable,
+              BugCommentTable.c.bug_id == BugTable.c.id,
+              isouter=True)
+        .join(
             title_cte,
             title_cte.c.id == BugTable.c.id, isouter=True
         )
-            .join(
+        .join(
             description_cte,
             description_cte.c.id == BugTable.c.id, isouter=True
         )
-            .where(
+        .where(
             (BugTable.c.title_id == id) |
             (BugTable.c.description_id == id) |
             (BugCommentTable.c.text_id == id)
@@ -181,13 +180,13 @@ class BugsRepository(BaseRepository[Bug]):
             BugCommentTable.c.bug_id,
             MyTextTable.c.content
         )
-            .select_from(BugCommentTable)
-            .join(
-                MyTextTable,
-                MyTextTable.c.id == BugCommentTable.c.text_id
+        .select_from(BugCommentTable)
+        .join(
+            MyTextTable,
+            MyTextTable.c.id == BugCommentTable.c.text_id
         )
-            .where(
-                BugCommentTable.c.bug_id == bug_id,
+        .where(
+            BugCommentTable.c.bug_id == bug_id,
         )
         )
         result = await self.connection_provider.get_current_connection().execute(stmt)

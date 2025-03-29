@@ -6,6 +6,7 @@ from spaghettihub.server.v1.api.handlers.github import \
 from spaghettihub.server.v1.api.handlers.merge_proposals import \
     MergeProposalsHandler
 from spaghettihub.server.v1.api.handlers.root import RootHandler
+from spaghettihub.server.v1.api.handlers.runner import GithubWorkflowRunnerHandler
 
 APIv1 = API(
     prefix="/v1",
@@ -14,6 +15,7 @@ APIv1 = API(
         MergeProposalsHandler(),
         LaunchpadToGithubWorkHandler(),
         BugsHandler(),
-        AuthHandler()
+        AuthHandler(),
+        GithubWorkflowRunnerHandler()
     ],
 )

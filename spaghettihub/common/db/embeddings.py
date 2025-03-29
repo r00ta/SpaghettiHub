@@ -1,8 +1,7 @@
 from typing import Optional
 
-from sqlalchemy import Select, delete, desc, insert, select
+from sqlalchemy import delete, desc, insert, select
 from sqlalchemy.sql.functions import count
-from sqlalchemy.sql.operators import eq
 
 from spaghettihub.common.db.repository import BaseRepository
 from spaghettihub.common.db.sequences import EmbeddingSequence

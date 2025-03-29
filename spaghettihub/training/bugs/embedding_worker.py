@@ -1,6 +1,5 @@
 import asyncio
 import multiprocessing
-import time
 
 from sqlalchemy.ext.asyncio import create_async_engine
 from transformers import AutoModel, AutoTokenizer

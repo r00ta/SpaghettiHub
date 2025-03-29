@@ -1,12 +1,10 @@
 import argparse
 import asyncio
-import datetime
 from typing import Optional
 
 from launchpadlib.launchpad import Launchpad
 from sqlalchemy.ext.asyncio import create_async_engine
 from tqdm import tqdm
-from transformers import AutoModel, AutoTokenizer
 
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.tables import METADATA

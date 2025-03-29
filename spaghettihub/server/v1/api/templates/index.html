@@ -1,98 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title>SpaghettiHub tools for fun and profit by r00ta</title>
     <link
-      rel="stylesheet"
-      href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
+            rel="stylesheet"
+            href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
     />
-  </head>
-  <body>
-    <div class="l-docs is-paper">
-      <div class="l-docs__header">
+</head>
+<body>
+<div class="l-docs is-paper">
+    <div class="l-docs__header">
         <header id="navigation" class="p-navigation is-dark">
-          <div class="l-docs__subgrid">
-            <div class="l-docs__sidebar">
-              <div class="p-navigation__banner">
-                <div class="p-navigation__tagged-logo">
-                  <a class="p-navigation__link" href="/">
-                    <div class="p-navigation__logo-tag">
-                      <img
-                        class="p-navigation__logo-icon"
-                        src="https://www.svgrepo.com/show/398366/spaghetti.svg"
-                        alt=""
-                      />
+            <div class="l-docs__subgrid">
+                <div class="l-docs__sidebar">
+                    <div class="p-navigation__banner">
+                        <div class="p-navigation__tagged-logo">
+                            <a class="p-navigation__link" href="/">
+                                <div class="p-navigation__logo-tag">
+                                    <img
+                                            class="p-navigation__logo-icon"
+                                            src="https://www.svgrepo.com/show/398366/spaghetti.svg"
+                                            alt=""
+                                    />
+                                </div>
+                                <span class="p-navigation__logo-title"
+                                >SpaghettiHub</span
+                                >
+                            </a>
+                        </div>
                     </div>
-                    <span class="p-navigation__logo-title"
-                      >SpaghettiHub</span
-                    >
-                  </a>
                 </div>
-              </div>
             </div>
-          </div>
-          <ul class="p-navigation__items">
-            <li class="p-navigation__item">
-            </li><li class="p-navigation__item">
-              {% if not user %}
-              <a class="p-navigation__link" href="/v1/login">
-                Login
-              </a>
-              {% else %}
-              <a class="p-navigation__link" href="/v1/logout">
-                Logout
-              </a>
-              {% endif %}
-            </li>
-          </ul>
+            <ul class="p-navigation__items">
+                <li class="p-navigation__item">
+                </li>
+                <li class="p-navigation__item">
+                    {% if not user %}
+                    <a class="p-navigation__link" href="/v1/login">
+                        Login
+                    </a>
+                    {% else %}
+                    <a class="p-navigation__link" href="/v1/logout">
+                        Logout
+                    </a>
+                    {% endif %}
+                </li>
+            </ul>
         </header>
         <br>
-          <div class="row">
+        <div class="row">
             <div class="col">
-              <div class="p-card u-no-padding">
-                  <div class="p-card__inner">
-                    <a href="/v1/launchpad_to_github">
-                      <h3>LaunchHub</h3>
-                    </a>
-                    <p>Covert MAAS MP to PR and run additional pipelines (code coverage, integration tests) on your code.
-                      <br>
-                      This tool requires authentication. If you want access, reach out to r00ta.
-                    </p>
-                  </div>
-              </div>
-              <div class="p-card u-no-padding">
-                  <div class="p-card__inner">
-                    <a href="/v1/merge_proposals">
-                      <h3>Commit to MP search tool</h3>
-                    </a>
-                    <p>Retrieve the MAAS MP that landed a specific commit.</p>
-                  </div>
-              </div>
-              <div class="p-card u-no-padding">
-                  <div class="p-card__inner">
-                    <a href="/v1/bugs">
-                      <h3>AI Bug finder</h3>
-                    </a>
-                    <p>Use the power of AI to find your MAAS bugs.</p>
-                  </div>
-              </div>
-              <div class="p-card u-no-padding">
-                  <div class="p-card__inner">
-                    <h3>AI Discourse Posts finder (Coming soon)</h3>
-                    <p>Use the power of AI to find your MAAS discourse posts.</p>
-                  </div>
-              </div>
-              <div class="p-card u-no-padding">
-                <div class="p-card__inner">
-                  <h3>AI Docs finder (Coming soon)</h3>
-                  <p>Use the power of AI to find the MAAS documentation you are looking for.</p>
+                <div class="p-card u-no-padding">
+                    <div class="p-card__inner">
+                        <a href="/v1/launchpad_to_github">
+                            <h3>LaunchHub</h3>
+                        </a>
+                        <p>Covert MAAS MP to PR and run additional pipelines (code coverage, integration tests) on your code.
+                            <br>
+                            This tool requires authentication. If you want access, reach out to r00ta.
+                        </p>
+                    </div>
                 </div>
-              </div>
+                <div class="p-card u-no-padding">
+                    <div class="p-card__inner">
+                        <a href="/v1/merge_proposals">
+                            <h3>Commit to MP search tool</h3>
+                        </a>
+                        <p>Retrieve the MAAS MP that landed a specific commit.</p>
+                    </div>
+                </div>
+                <div class="p-card u-no-padding">
+                    <div class="p-card__inner">
+                        <a href="/v1/bugs">
+                            <h3>AI Bug finder</h3>
+                        </a>
+                        <p>Use the power of AI to find your MAAS bugs.</p>
+                    </div>
+                </div>
+                <div class="p-card u-no-padding">
+                    <div class="p-card__inner">
+                        <h3>AI Discourse Posts finder (Coming soon)</h3>
+                        <p>Use the power of AI to find your MAAS discourse posts.</p>
+                    </div>
+                </div>
+                <div class="p-card u-no-padding">
+                    <div class="p-card__inner">
+                        <h3>AI Docs finder (Coming soon)</h3>
+                        <p>Use the power of AI to find the MAAS documentation you are looking for.</p>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
     </div>
-  </body>
+</div>
+</body>
 </html>
 

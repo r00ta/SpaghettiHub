@@ -8,13 +8,12 @@ from spaghettihub.common.services.base import Service
 
 
 class LastUpdateService(Service):
-
     ROW_ID = 1
 
     def __init__(
-        self,
-        connection_provider: ConnectionProvider,
-        last_update_repository: LastUpdateRepository,
+            self,
+            connection_provider: ConnectionProvider,
+            last_update_repository: LastUpdateRepository,
     ):
         super().__init__(connection_provider)
         self.last_update_repository = last_update_repository

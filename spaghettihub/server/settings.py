@@ -27,11 +27,12 @@ class DatabaseConfig:
 class Config:
     db: DatabaseConfig | None
     secret: str | None = None
+    webhook_secret: str | None = None
     debug_queries: bool = False
     debug: bool = False
 
 
-def read_config(secret: str | None = None) -> Config:
+def read_config(secret: str | None = None, webhook_secret: str | None = None) -> Config:
     return Config(
         # TODO: do not hardcode this
         DatabaseConfig(
@@ -42,5 +43,6 @@ def read_config(secret: str | None = None) -> Config:
             5432
         ),
         secret=secret,
+        webhook_secret=webhook_secret,
         debug_queries=False,
         debug=False)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Generic, List, Sequence, TypeVar, Union
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, PrivateAttr
 from pydantic.generics import GenericModel
 
 T = TypeVar("T")
@@ -24,7 +24,6 @@ class Unset(BaseModel):
 
 
 class OneToOne(GenericModel, Generic[T]):
-
     _id: Union[int, None] = PrivateAttr(default=None)
     _id_loaded: bool = PrivateAttr(default=False)
 
@@ -64,7 +63,6 @@ class OneToOne(GenericModel, Generic[T]):
 
 
 class OneToMany(GenericModel, Generic[T]):
-
     _ids: Union[List[int], None] = PrivateAttr(default=None)
     _ids_loaded: bool = PrivateAttr(default=False)
 

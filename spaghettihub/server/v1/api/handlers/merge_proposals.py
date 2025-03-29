@@ -46,11 +46,11 @@ class MergeProposalsHandler(Handler):
         status_code=200,
     )
     async def get_merge_proposal_template_search(
-        self,
-        request: Request,
-        services: ServiceCollection = Depends(services),
-        pagination_params: PaginationParams = Depends(),
-        message_query_param: MergeProposalMessageMatch = Depends(),
+            self,
+            request: Request,
+            services: ServiceCollection = Depends(services),
+            pagination_params: PaginationParams = Depends(),
+            message_query_param: MergeProposalMessageMatch = Depends(),
     ):
         merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message(
             message_query_param.query,
@@ -78,10 +78,10 @@ class MergeProposalsHandler(Handler):
         status_code=200,
     )
     async def find_by_commit_message_match(
-        self,
-        services: ServiceCollection = Depends(services),
-        pagination_params: PaginationParams = Depends(),
-        message_query_param: MergeProposalMessageMatch = Depends(),
+            self,
+            services: ServiceCollection = Depends(services),
+            pagination_params: PaginationParams = Depends(),
+            message_query_param: MergeProposalMessageMatch = Depends(),
     ) -> MergeProposalsListResponse:
         merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message(
             message_query_param.message,

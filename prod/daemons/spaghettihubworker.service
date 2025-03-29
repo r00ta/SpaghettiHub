@@ -5,7 +5,7 @@ Description=SpaghettiHub temporal worker Service
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/spaghettihub
-ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubworker --gh_token REDACTED"
+ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubworker --gh_token REDACTED --gh_runner_token REDACTED --lxd_host REDACTED --lxd_trusted_password REDACTED"
 Restart=always
 RestartSec=15
 StartLimitInterval=0

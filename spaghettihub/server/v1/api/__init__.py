@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 from fastapi.security import APIKeyCookie
 from starlette import status
 
@@ -6,7 +6,7 @@ from spaghettihub.common.services.collection import ServiceCollection
 
 
 def services(
-    request: Request
+        request: Request
 ) -> ServiceCollection:
     """Dependency to return the services collection."""
     return request.state.services

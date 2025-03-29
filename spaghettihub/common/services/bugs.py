@@ -12,10 +12,10 @@ from spaghettihub.common.services.texts import TextsService
 class BugsService(Service):
 
     def __init__(
-        self,
-        connection_provider: ConnectionProvider,
-        bugs_repository: BugsRepository,
-        texts_service: TextsService,
+            self,
+            connection_provider: ConnectionProvider,
+            bugs_repository: BugsRepository,
+            texts_service: TextsService,
     ):
         super().__init__(connection_provider)
         self.bugs_repository = bugs_repository

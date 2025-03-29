@@ -1,10 +1,8 @@
 from pathlib import Path
 
-from fastapi import Depends, Request
-from pydantic import BaseModel
+from fastapi import Request
 from starlette.templating import Jinja2Templates
 
-from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.server.base.api.base import Handler, handler
 
 templates_path = Path(__file__).resolve().parent.parent / 'templates'

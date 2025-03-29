@@ -1,4 +1,3 @@
-
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.bugs import BugsRepository
 from spaghettihub.common.db.embeddings import EmbeddingsRepository
@@ -13,6 +12,7 @@ from spaghettihub.common.services.embeddings import (EmbeddingsCache,
 from spaghettihub.common.services.github import LaunchpadToGithubWorkService
 from spaghettihub.common.services.last_update import LastUpdateService
 from spaghettihub.common.services.merge_proposals import MergeProposalsService
+from spaghettihub.common.services.runner import GithubWorkflowRunnerService
 from spaghettihub.common.services.texts import TextsService
 from spaghettihub.common.services.users import UsersService
 
@@ -25,10 +25,11 @@ class ServiceCollection:
     merge_proposals_service: MergeProposalsService
     launchpad_to_github_work_service: LaunchpadToGithubWorkService
     users_service: UsersService
+    github_workflow_runner_service: GithubWorkflowRunnerService
 
     @classmethod
-    def produce(cls, connection_provider: ConnectionProvider, embeddings_cache: EmbeddingsCache | None = None) -> \
-            "ServiceCollection":
+    def produce(cls, connection_provider: ConnectionProvider, embeddings_cache: EmbeddingsCache | None = None,
+                webhook_secret: str | None = None) -> "ServiceCollection":
         services = cls()
         services.last_update_service = LastUpdateService(
             connection_provider=connection_provider,
@@ -66,7 +67,11 @@ class ServiceCollection:
             connection_provider=connection_provider,
             launchpad_to_github_work_repository=LaunchpadToGithubWorkRepository(
                 connection_provider=connection_provider
-            )
+            ),
+        )
+        services.github_workflow_runner_service = GithubWorkflowRunnerService(
+            connection_provider=connection_provider,
+            webhook_secret=webhook_secret
         )
         services.users_service = UsersService(
             connection_provider=connection_provider,

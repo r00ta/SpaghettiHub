@@ -5,7 +5,7 @@ Description=SpaghettiHub Service
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/spaghettihub
-ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubserver --port 1443 --ssl-keyfile REDACTED --ssl-certfile REDACTED --secret REDACTED"
+ExecStart=/bin/bash -c "source ve/bin/activate && spaghettihubserver --port 1443 --ssl-keyfile REDACTED --ssl-certfile REDACTED --secret REDACTED --webhook-secret REDACTED"
 Restart=always
 RestartSec=15
 StartLimitInterval=0

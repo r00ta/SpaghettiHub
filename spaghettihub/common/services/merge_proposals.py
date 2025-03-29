@@ -1,11 +1,8 @@
 from datetime import datetime
-from typing import List, Optional
 
 from spaghettihub.common.db.base import ConnectionProvider
-from spaghettihub.common.db.last_update import LastUpdateRepository
 from spaghettihub.common.db.merge_proposals import MergeProposalsRepository
 from spaghettihub.common.models.base import ListResult
-from spaghettihub.common.models.last_update import LastUpdate
 from spaghettihub.common.models.merge_proposals import MergeProposal
 from spaghettihub.common.services.base import Service
 
@@ -13,9 +10,9 @@ from spaghettihub.common.services.base import Service
 class MergeProposalsService(Service):
 
     def __init__(
-        self,
-        connection_provider: ConnectionProvider,
-        merge_proposals_repository: MergeProposalsRepository,
+            self,
+            connection_provider: ConnectionProvider,
+            merge_proposals_repository: MergeProposalsRepository,
     ):
         super().__init__(connection_provider)
         self.merge_proposals_repository = merge_proposals_repository

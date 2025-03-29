@@ -8,10 +8,6 @@ from spaghettihub.server.base.api.base import Handler, handler
 from spaghettihub.server.v1.api import services
 from spaghettihub.server.v1.api.models.requests.base import PaginationParams
 from spaghettihub.server.v1.api.models.requests.bugs import BugsSearchParam
-from spaghettihub.server.v1.api.models.requests.merge_proposals import \
-    MergeProposalMessageMatch
-from spaghettihub.server.v1.api.models.responses.merge_proposals import (
-    MergeProposalResponse, MergeProposalsListResponse)
 
 templates_path = Path(__file__).resolve().parent.parent / 'templates'
 templates = Jinja2Templates(directory=str(templates_path))
@@ -48,11 +44,11 @@ class BugsHandler(Handler):
         status_code=200,
     )
     async def get_bugs_search(
-        self,
-        request: Request,
-        services: ServiceCollection = Depends(services),
-        pagination_params: PaginationParams = Depends(),
-        search: BugsSearchParam = Depends(),
+            self,
+            request: Request,
+            services: ServiceCollection = Depends(services),
+            pagination_params: PaginationParams = Depends(),
+            search: BugsSearchParam = Depends(),
     ):
         bugs = await services.embeddings_service.find_similar_issues(search.query, pagination_params.size)
         return templates.TemplateResponse(

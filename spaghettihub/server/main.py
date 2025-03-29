@@ -51,6 +51,10 @@ def make_arg_parser():
                         type=str,
                         required=True,
                         help="Set the session secret")
+    parser.add_argument("--webhook-secret",
+                        type=str,
+                        required=True,
+                        help="Set the webhook secret")
     return parser
 
 
@@ -72,7 +76,7 @@ def create_app(config: Config) -> FastAPI:
         model=AutoModel.from_pretrained("BAAI/bge-large-en-v1.5"),
         tokenizer=AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
     )
-    app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache)
+    app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache, webhook_secret=config.webhook_secret)
     app.add_middleware(TransactionMiddleware, db=db)
     app.add_middleware(
         SessionMiddleware,
@@ -89,7 +93,7 @@ def run():
     parser = make_arg_parser()
     args = parser.parse_args()
 
-    app_config = read_config(secret=args.secret)
+    app_config = read_config(secret=args.secret, webhook_secret=args.webhook_secret)
     logging.basicConfig(
         level=logging.INFO
     )

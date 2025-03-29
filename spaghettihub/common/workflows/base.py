@@ -10,7 +10,7 @@ class ActivityBase:
     _db: Database
 
     def __init__(
-        self, db: Database, connection: AsyncConnection | None = None
+            self, db: Database, connection: AsyncConnection | None = None
     ):
         self._db = db
         # if provided, will use the single connection and assume a transaction has begun

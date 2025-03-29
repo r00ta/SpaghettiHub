@@ -16,3 +16,4 @@ temporalio==1.6.0
 itsdangerous==2.2.0
 autopep8==2.1.0
 isort==5.13.2
+pylxd==2.3.5

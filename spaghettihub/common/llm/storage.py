@@ -85,9 +85,9 @@ class Storage:
             existing_bug = cur.fetchone()
 
             if (
-                existing_bug is None
-                or datetime.strptime(existing_bug[0], "%Y-%m-%d %H:%M:%S.%f%z")
-                < b.bug.date_last_updated
+                    existing_bug is None
+                    or datetime.strptime(existing_bug[0], "%Y-%m-%d %H:%M:%S.%f%z")
+                    < b.bug.date_last_updated
             ):
                 self.con.execute("BEGIN TRANSACTION")
                 # Bug is not in database or is outdated, so insert or update it

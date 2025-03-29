@@ -1,14 +1,11 @@
-from typing import List, Optional
+from typing import Optional
 
-from sqlalchemy import Select, delete, desc, insert, select
+from sqlalchemy import delete, desc, insert, select
 from sqlalchemy.sql.functions import count
-from sqlalchemy.sql.operators import eq
 
 from spaghettihub.common.db.repository import BaseRepository
-from spaghettihub.common.db.sequences import (MergeProposalsSequence,
-                                              MyTextSequence)
-from spaghettihub.common.db.tables import (EmbeddingTable, MergeProposalTable,
-                                           MyTextTable)
+from spaghettihub.common.db.sequences import (MergeProposalsSequence)
+from spaghettihub.common.db.tables import (MergeProposalTable)
 from spaghettihub.common.models.base import ListResult
 from spaghettihub.common.models.merge_proposals import MergeProposal
 from spaghettihub.common.models.texts import MyText
