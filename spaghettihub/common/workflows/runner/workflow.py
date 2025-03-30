@@ -21,7 +21,7 @@ class TemporalGithubRunnerWorkflow:
             return await workflow.execute_child_workflow(
                 "internal-github-runner-workflow",
                 params,
-                id="internal-github-runner-workflow" + str(params.run_id),
+                id="internal-github-runner-workflow-" + str(params.id),
                 task_queue=TASK_QUEUE_NAME,
                 retry_policy=RetryPolicy(maximum_attempts=1),
                 execution_timeout=timedelta(days=1)
@@ -29,7 +29,7 @@ class TemporalGithubRunnerWorkflow:
         except Exception:
             await workflow.execute_activity(
                 "destroy-runner",
-                params.run_id,
+                params.id,
                 start_to_close_timeout=timedelta(seconds=60),
                 heartbeat_timeout=timedelta(seconds=30),
                 retry_policy=RetryPolicy(maximum_attempts=1)
@@ -56,7 +56,7 @@ class TemporalInternalGithubRunnerWorkflow:
         await workflow.execute_activity(
             "spawn-runner",
             SpawnVirtualMachineActivityParams(
-                run_id=params.run_id,
+                id=params.id,
                 labels=params.labels,
                 registration_token=registration_token
             ),
@@ -68,7 +68,7 @@ class TemporalInternalGithubRunnerWorkflow:
 
         await workflow.execute_activity(
             "destroy-runner",
-            params.run_id,
+            params.id,
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=30)
         )

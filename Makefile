@@ -26,9 +26,9 @@ migrate:
 	alembic upgrade head
 
 setup-temporal:
-    sudo snap install --channel=latest/edge temporal-server
-    sudo temporal-server.init-sqlite
-    sudo snap restart temporal-server
+	sudo snap install --channel=latest/edge temporal-server
+	sudo temporal-server.init-sqlite
+	sudo snap restart temporal-server
 
 download-temporal-cli:
 	wget https://github.com/temporalio/tctl/releases/download/v1.18.0/tctl_1.18.0_linux_amd64.tar.gz -P /tmp
@@ -53,6 +53,8 @@ prod-create-daemons:
 	sudo systemctl start spaghettihubmpupdate.timer
 	sudo systemctl start spaghettihubworker.service
 
+lxd-setup:
+    openssl req -x509 -newkey rsa:2048 -keyout /home/ubuntu/lxd.key -nodes -out /home/ubuntu/lxd.crt -subj "/CN=10.185.5.1"
 
 setup-production: install-dependencies setup-postgres prepare-ve setup-temporal download-temporal-cli create-temporal-namespace prod-create-daemons prod-create-daemons
 

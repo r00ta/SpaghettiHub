@@ -38,27 +38,27 @@ class GithubWorkflowRunnerService(Service):
             await client.start_workflow(
                 "github-runner-workflow",
                 TemporalGithubRunnerWorkflowParams(
-                    run_id=request.workflow_job.run_id,
+                    id=request.workflow_job.id,
                     run_url=request.workflow_job.run_url,
                     labels=request.workflow_job.labels,
                 ),
-                id="github-runner-workflow-" + str(request.workflow_job.run_id),
+                id="github-runner-workflow-" + str(request.workflow_job.id),
                 task_queue=TASK_QUEUE_NAME,
             )
-            log.info(f"New runner workflow {str(request.workflow_job.run_id)}")
+            log.info(f"New runner workflow {str(request.workflow_job.id)}")
         elif request.action == WorkflowAction.completed:
             if "self-hosted" not in request.workflow_job.labels:
                 return
 
             client = await Client.connect("localhost:7233")
 
-            # The runner name is the run_id of the workflow that handled the workload.
+            # The runner name is the id of the workflow that handled the workload.
             hdl = client.get_workflow_handle("internal-github-runner-workflow-" + str(request.workflow_job.runner_name))
             try:
                 await hdl.signal("completed")
-                log.info(f"Workflow {str(request.workflow_job.run_id)} has been signaled")
+                log.info(f"Workflow {str(request.workflow_job.id)} has been signaled")
             except RPCError:
-                log.warning(f"Could not signal the workflow {str(request.workflow_job.run_id)}")
+                log.warning(f"Could not signal the workflow {str(request.workflow_job.id)}")
 
     def verify_signature(self, payload_body, signature_header):
         """Verify that the payload was sent from GitHub by validating SHA256.

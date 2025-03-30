@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class WorkflowJob(BaseModel):
-    run_id: int
+    id: int
     run_url: str
     labels: list[str]
     runner_name: Optional[str]

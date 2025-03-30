@@ -12,7 +12,7 @@ class GithubRunnerActivity(ActivityBase):
     def __init__(self, db: Database, gh_runner_token: str, lxd_host: str, lxd_trusted_password: str):
         super().__init__(db)
         self.gh_runner_token = gh_runner_token
-        self.lxd_client = Client(lxd_host, verify=False)
+        self.lxd_client = Client(lxd_host, cert=('/home/ubuntu/lxd.crt', '/home/ubuntu/lxd.key'), verify=False)
         self.lxd_client.authenticate(lxd_trusted_password)
 
     @activity.defn(name="get-registration-token")
@@ -35,15 +35,16 @@ class GithubRunnerActivity(ActivityBase):
 #cloud-config
 runcmd:
   - useradd runner
+  - "echo 'runner ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/runner"
   - su runner -c "mkdir -p /tmp/actions-runner"
   - su runner -c "curl -o /tmp/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz"
   - su runner -c "echo '0dbc9bf5a58620fc52cb6cc0448abcca964a8d74b5f39773b7afcad9ab691e19  /tmp/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz' | shasum -a 256 -c"
   - su runner -c "cd /tmp/actions-runner && tar xzf ./actions-runner-linux-x64-2.323.0.tar.gz"
-  - su runner -c "python3 -c 'print(); print(\"{params.run_id}\")' | /tmp/actions-runner/config.sh --url https://github.com/SpaghettiHub/maas --token {params.registration_token} --labels {",".join(params.labels)} --ephemeral"
+  - su runner -c "python3 -c 'print(); print(\"{params.id}\")' | /tmp/actions-runner/config.sh --url https://github.com/SpaghettiHub/maas --token {params.registration_token} --labels {",".join(params.labels)} --ephemeral"
   - su runner -c "/tmp/actions-runner/run.sh &"
 """
         config = {
-            "name": self.build_vm_name(params.run_id),
+            "name": self.build_vm_name(params.id),
             "type": "virtual-machine",
             "source": {
                 "type": "image",
@@ -56,14 +57,14 @@ runcmd:
                 "user.user-data": user_data
             }
         }
-        instance = self.lxd_client.instances.create(config)
+        instance = self.lxd_client.instances.create(config, wait=True)
         instance.start()
 
     @activity.defn(name="destroy-runner")
-    async def destroy_runner(self, run_id: int) -> None:
-        instance = self.lxd_client.instances.get(self.build_vm_name(run_id))
+    async def destroy_runner(self, id: int) -> None:
+        instance = self.lxd_client.instances.get(self.build_vm_name(id))
         instance.stop()
         instance.delete()
 
-    def build_vm_name(self, run_id: int) -> str:
-        return f"runner-{run_id}"
+    def build_vm_name(self, id: int) -> str:
+        return f"runner-{id}"

@@ -30,5 +30,5 @@ class GithubWorkflowRunnerHandler(Handler):
             typed_request: GithubWebhook,
             services: ServiceCollection = Depends(services)
     ):
-        services.github_workflow_runner_service.verify_signature(request.body(), request.headers.get("x-hub-signature-256"))
+        services.github_workflow_runner_service.verify_signature(await request.body(), request.headers.get("x-hub-signature-256"))
         await services.github_workflow_runner_service.process_webhook(typed_request)
