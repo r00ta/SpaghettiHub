@@ -35,8 +35,8 @@ class GithubRunnerActivity(ActivityBase):
 #cloud-config
 runcmd:
   - useradd runner
+  - chown -R runner /home/runner/ 
   - "echo 'runner ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/runner"
-  - su runner -c "mkdir -p /home/runner/.git"
   - su runner -c "git config --global user.name 'r00tabot runner'"
   - su runner -c "git config --global user.email example@example.com"
   - su runner -c "mkdir -p /tmp/actions-runner"
