@@ -37,6 +37,7 @@ runcmd:
   - useradd runner
   - mkhomedir_helper runner
   - "echo 'runner ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/runner"
+  - usermod -a -G lxd runner
   - su runner -c "git config --global user.name 'r00tabot runner'"
   - su runner -c "git config --global user.email example@example.com"
   - su runner -c "mkdir -p /tmp/actions-runner"
