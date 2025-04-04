@@ -61,6 +61,14 @@ runcmd:
                 "user.user-data": user_data,
                 'limits.cpu': '2' if "large-runner" in params.labels else '1',
                 'limits.memory': '16GiB' if "large-runner" in params.labels else '4GiB'
+            },
+            "devices": {
+                "root": {
+                    "path": "/",
+                    "type": "disk",
+                    "size": "50GiB" if "large-runner" in params.labels else "8GiB",
+                    "pool": "default"
+                }
             }
         }
         instance = self.lxd_client.instances.create(config, wait=True)
