@@ -38,6 +38,7 @@ runcmd:
   - mkhomedir_helper runner
   - "echo 'runner ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/runner"
   - "echo 'Acquire::http::Proxy \'http://172.0.2.17:8000\';' | sudo tee /etc/apt/apt.conf.d/00proxy"
+  - "echo 'http_proxy=\'http://172.0.2.17:8000/\'' > /etc/environment"
   - usermod -a -G lxd runner
   - su runner -c "git config --global user.name 'r00tabot runner'"
   - su runner -c "git config --global user.email example@example.com"
