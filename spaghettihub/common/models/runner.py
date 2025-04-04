@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -11,7 +11,7 @@ class WorkflowJob(BaseModel):
     runner_name: Optional[str]
 
 
-class WorkflowAction(StrEnum):
+class WorkflowAction(str, Enum):
     completed = "completed"
     in_progress = "in_progress"
     queued = "queued"
