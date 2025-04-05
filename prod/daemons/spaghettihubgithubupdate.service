@@ -1,0 +1,9 @@
+# Place me under /etc/systemd/system/spaghettihubgithubupdate.service
+[Unit]
+Description=SpaghettiHub github repo updater Service
+
+[Service]
+User=root
+WorkingDirectory=/home/ubuntu/spaghettihub/prod/scripts
+ExecStart=/bin/bash -c "./update_spaghettihub_maas.sh"
+Type=oneshot

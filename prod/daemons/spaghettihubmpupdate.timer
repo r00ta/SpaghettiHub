@@ -1,0 +1,11 @@
+# Place me under /etc/systemd/system/spaghettihubmpupdate.timer
+[Unit]
+Description=SpaghettiHub updater scheduler
+
+[Timer]
+Persistent=true
+AccuracySec=1s
+OnCalendar=daily
+
+[Install]
+WantedBy=timers.target

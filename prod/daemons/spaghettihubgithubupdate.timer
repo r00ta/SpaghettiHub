@@ -1,0 +1,11 @@
+# Place me under /etc/systemd/system/spaghettihubgithubupdate.timer
+[Unit]
+Description=SpaghettiHub github repo updater scheduler
+
+[Timer]
+Persistent=true
+AccuracySec=1s
+OnCalendar=*:0/30
+
+[Install]
+WantedBy=timers.target
