@@ -40,7 +40,6 @@ class CommitAuthor(BaseModel):
 class GithubCommit(BaseModel):
     id: str
     author: CommitAuthor
-    committer: CommitAuthor
     message: str
     timestamp: datetime
 
