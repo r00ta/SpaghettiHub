@@ -40,7 +40,7 @@ class GithubWorkflowRunnerService(Service):
             return
 
         # Should not happen, but it might be that the workflow job was processed before.
-        maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
+        maas = await self.maas_repository.find_by_sha(request.head_commit.id)
         if maas is not None:
             maas.commit_sha = request.head_commit.id,
             maas.commit_message = request.head_commit.message,
