@@ -3,7 +3,7 @@
 Description=SpaghettiHub updater Service
 
 [Service]
-User=ubuntu
+User=root
 WorkingDirectory=/home/ubuntu/spaghettihub/prod/scripts
 ExecStart=/bin/bash -c "./update_database.sh"
 Type=oneshot
