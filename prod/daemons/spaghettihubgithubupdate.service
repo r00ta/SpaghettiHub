@@ -3,7 +3,7 @@
 Description=SpaghettiHub github repo updater Service
 
 [Service]
-User=root
+User=ubuntu
 WorkingDirectory=/home/ubuntu/spaghettihub/prod/scripts
 ExecStart=/bin/bash -c "./update_spaghettihub_maas.sh"
 Type=oneshot
