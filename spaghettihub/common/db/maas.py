@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import delete, insert, select, update, desc
 from sqlalchemy.sql.functions import count
 
-from spaghettihub.common.db.repository import BaseRepository
+from spaghettihub.common.db.repository import BaseRepository, T
 from spaghettihub.common.db.sequences import (MAASSequence)
 from spaghettihub.common.db.tables import (MAASTable)
 from spaghettihub.common.models.base import ListResult
@@ -11,6 +11,9 @@ from spaghettihub.common.models.maas import MAAS
 
 
 class MAASRepository(BaseRepository[MAAS]):
+    async def list(self, size: int, page: int) -> ListResult[MAAS]:
+        pass
+
     async def get_next_id(self) -> int:
         stmt = select(MAASSequence.next_value())
         return (
