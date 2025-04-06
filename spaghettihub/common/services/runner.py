@@ -51,7 +51,7 @@ class GithubWorkflowRunnerService(Service):
             await self.maas_repository.create(
                 MAAS(
                     id=await self.maas_repository.get_next_id(),
-                    commit_sha=request.after,
+                    commit_sha=request.head_commit.id,
                     commit_message=request.head_commit.message,
                     committer_username=request.head_commit.author.username,
                     commit_date=request.head_commit.timestamp,
