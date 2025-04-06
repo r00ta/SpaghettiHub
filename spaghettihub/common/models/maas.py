@@ -20,4 +20,5 @@ class MAAS(BaseModel):
     commit_message: str | None
     committer_username: str | None
     commit_date: datetime | None
-    continuous_delivery_test_status: WorkflowConclusion | None = None
+    continuous_delivery_test_deb_status: WorkflowConclusion | None = None
+    continuous_delivery_test_snap_status: WorkflowConclusion | None = None

@@ -9,6 +9,7 @@ from spaghettihub.common.models.maas import WorkflowConclusion
 
 class WorkflowJob(BaseModel):
     id: int
+    name: str
     workflow_name: str
     head_branch: str
     head_sha: str

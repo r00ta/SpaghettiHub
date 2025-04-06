@@ -84,7 +84,8 @@ MAASTable = Table(
     Column("commit_message", Text, nullable=True),
     Column("committer_username", String(128), nullable=True),
     Column("commit_date", DateTime(timezone=True), nullable=True),
-    Column("continuous_delivery_test_status", String(64), nullable=True),
+    Column("continuous_delivery_test_deb_status", String(64), nullable=True),
+    Column("continuous_delivery_test_snap_status", String(64), nullable=True),
 )
 
 UserTable = Table(

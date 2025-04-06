@@ -77,7 +77,10 @@ class GithubWorkflowRunnerService(Service):
                 committer_username=None,
                 commit_date=None,
             )
-            maas.continuous_delivery_test_status = request.workflow_job.conclusion
+            if request.workflow_job.name == "deb":
+                maas.continuous_delivery_test_deb_status = request.workflow_job.conclusion
+            elif request.workflow_job.name == "snap":
+                maas.continuous_delivery_test_snap_status = request.workflow_job.conclusion
             await self.maas_repository.update(maas)
 
         if request.action == WorkflowAction.queued:

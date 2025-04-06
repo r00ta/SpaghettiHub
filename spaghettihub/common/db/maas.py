@@ -48,7 +48,7 @@ class MAASRepository(BaseRepository[MAAS]):
             return None
         return MAAS(**maas._asdict())
 
-    async def list_commits(self, query: str | None, size: int, page: int) -> ListResult[MAAS]:
+    async def list_commits(self, query: str | None, page: int, size: int) -> ListResult[MAAS]:
         total_stmt = select(count()).select_from(MAASTable)
         if query:
             total_stmt = total_stmt.where(MAASTable.c.commit_sha.like("%" + query + "%"))
