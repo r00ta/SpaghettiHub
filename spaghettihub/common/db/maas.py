@@ -38,7 +38,7 @@ class MAASRepository(BaseRepository[MAAS]):
         return MAAS(**maas._asdict())
 
     async def find_by_sha(self, sha: str) -> Optional[MAAS]:
-        stmt = select("*").select_from(MAASTable).where(MAASTable.c.sha == sha)
+        stmt = select("*").select_from(MAASTable).where(MAASTable.c.commit_sha == sha)
         result = await self.connection_provider.get_current_connection().execute(stmt)
         maas = result.first()
         if not maas:
