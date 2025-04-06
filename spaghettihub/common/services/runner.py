@@ -38,6 +38,9 @@ class GithubWorkflowRunnerService(Service):
     async def list_commits(self, query: str | None, page: int, size: int):
         return await self.maas_repository.list_commits(query, page, size)
 
+    async def list(self, page: int, size: int):
+        pass
+
     async def process_push_webhook(self, request: GithubPushWebhook):
         if request.ref != "refs/heads/master":
             return
