@@ -6,7 +6,9 @@ from temporalio.client import Client
 from temporalio.service import RPCError
 
 from spaghettihub.common.db.base import ConnectionProvider
-from spaghettihub.common.models.runner import GithubWebhook, WorkflowAction
+from spaghettihub.common.db.maas import MAASRepository
+from spaghettihub.common.models.maas import MAAS
+from spaghettihub.common.models.runner import GithubWebhook, WorkflowAction, GithubPushWebhook, WorkflowJob
 from spaghettihub.common.services.base import Service
 from spaghettihub.common.workflows.constants import TASK_QUEUE_NAME
 from spaghettihub.common.workflows.runner.params import TemporalGithubRunnerWorkflowParams
@@ -23,12 +25,55 @@ class GithubWorkflowRunnerService(Service):
     def __init__(
             self,
             connection_provider: ConnectionProvider,
+            maas_repository: MAASRepository,
             webhook_secret: str,
     ):
         super().__init__(connection_provider)
         self.webhook_secret = webhook_secret
+        self.maas_repository = maas_repository
+
+    def is_continuous_deliver_pipeline(self, workflow: WorkflowJob):
+        return "Continuous delivery pipeline" == workflow.workflow_name and "master" == workflow.head_branch
+
+    async def process_push_webhook(self, request: GithubPushWebhook):
+        if request.ref != "refs/heads/master":
+            return
+
+        # Should not happen, but it might be that the workflow job was processed before.
+        maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
+        if maas is not None:
+            maas.commit_sha = request.head_commit.id,
+            maas.commit_message = request.head_commit.message,
+            maas.committer_username = request.head_commit.author.username,
+            maas.commit_date = request.head_commit.timestamp
+            await self.maas_repository.update(maas)
+        else:
+            await self.maas_repository.create(
+                MAAS(
+                    id=await self.maas_repository.get_next_id(),
+                    commit_sha=request.after,
+                    commit_message=request.head_commit.message,
+                    committer_username=request.head_commit.author.username,
+                    commit_date=request.head_commit.timestamp,
+                )
+            )
 
     async def process_webhook(self, request: GithubWebhook):
+        # Specific handling for this job triggered when something has been pushed to main
+        if self.is_continuous_deliver_pipeline(request.workflow_job):
+            maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
+            if maas is None:
+                log.warning(f"Could not find commit with sha {request.workflow_job.head_sha}. Creating it")
+            maas = MAAS(
+                id=await self.maas_repository.get_next_id(),
+                commit_sha=request.workflow_job.head_sha,
+                commit_message=None,
+                committer_username=None,
+                commit_date=None,
+            )
+            maas.continuous_delivery_test_status = request.workflow_job.conclusion
+            await self.maas_repository.update(maas)
+
         if request.action == WorkflowAction.queued:
             if "self-hosted" not in request.workflow_job.labels:
                 return

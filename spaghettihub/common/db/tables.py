@@ -5,7 +5,7 @@ from spaghettihub.common.db.sequences import (BugCommentSequence,
                                               EmbeddingSequence,
                                               LaunchpadToGithubWorkSequence,
                                               MergeProposalsSequence,
-                                              MyTextSequence, UsersSequence)
+                                              MyTextSequence, UsersSequence, MAASSequence)
 
 METADATA = MetaData()
 
@@ -74,6 +74,17 @@ LaunchpadToGithubWorkTable = Table(
     Column("status", String(64), nullable=False),
     Column("github_url", Text, nullable=True),
     Column("launchpad_url", Text, nullable=True),
+)
+
+MAASTable = Table(
+    "maas",
+    METADATA,
+    Column("id", Integer, MAASSequence, primary_key=True),
+    Column("commit_sha", String(64), nullable=False),
+    Column("commit_message", Text, nullable=True),
+    Column("committer_username", String(128), nullable=True),
+    Column("commit_date", DateTime(timezone=True), nullable=True),
+    Column("continuous_delivery_test_status", String(64), nullable=True),
 )
 
 UserTable = Table(

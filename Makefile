@@ -41,16 +41,22 @@ create-temporal-namespace:
 prod-create-daemons:
 	sudo cp $(THIS_DIR)prod/daemons/spaghettihubserver.service /etc/systemd/system/spaghettihubserver.service
 	sudo cp $(THIS_DIR)prod/daemons/spaghettihubmpupdate.service /etc/systemd/system/spaghettihubmpupdate.service
-	sudo cp $(THIS_DIR)prod/daemons/spaghettihubmpupdate.timer /etc/systemd/system/spaghettihubmpupdate.timer
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubmpupdate.timer /etc/systemd/system/spaghettihubmpupdate.servictimer
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubgithubupdate.service /etc/systemd/system/spaghettihubgithubupdate.service
+	sudo cp $(THIS_DIR)prod/daemons/spaghettihubgithubupdate.timer /etc/systemd/system/spaghettihubgithubupdate.timer
 	sudo cp $(THIS_DIR)prod/daemons/spaghettihubworker.service /etc/systemd/system/spaghettihubworker.service
 	sudo systemctl daemon-reload
 	sudo systemctl enable spaghettihubserver.service
 	sudo systemctl enable spaghettihubmpupdate.service
 	sudo systemctl enable spaghettihubmpupdate.timer
+	sudo systemctl enable spaghettihubgithubupdate.service
+	sudo systemctl enable spaghettihubgithubupdate.timer
 	sudo systemctl enable spaghettihubworker.service
 	sudo systemctl start spaghettihubserver.service
 	sudo systemctl start spaghettihubmpupdate.service
 	sudo systemctl start spaghettihubmpupdate.timer
+	sudo systemctl start spaghettihubgithubupdate.service
+	sudo systemctl start spaghettihubgithubupdate.timer
 	sudo systemctl start spaghettihubworker.service
 
 lxd-setup:

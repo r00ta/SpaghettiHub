@@ -8,3 +8,4 @@ MergeProposalsSequence = Sequence("merge_proposals_id_seq", start=1)
 LaunchpadToGithubWorkSequence = Sequence(
     "launchpad_to_github_work_id_seq", start=1)
 UsersSequence = Sequence("user_auth_id_seq", start=1)
+MAASSequence = Sequence("maas_id_seq", start=1)

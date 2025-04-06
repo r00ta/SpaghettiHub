@@ -3,6 +3,7 @@ from spaghettihub.common.db.bugs import BugsRepository
 from spaghettihub.common.db.embeddings import EmbeddingsRepository
 from spaghettihub.common.db.github import LaunchpadToGithubWorkRepository
 from spaghettihub.common.db.last_update import LastUpdateRepository
+from spaghettihub.common.db.maas import MAASRepository
 from spaghettihub.common.db.merge_proposals import MergeProposalsRepository
 from spaghettihub.common.db.texts import TextsRepository
 from spaghettihub.common.db.users import UsersRepository
@@ -71,6 +72,7 @@ class ServiceCollection:
         )
         services.github_workflow_runner_service = GithubWorkflowRunnerService(
             connection_provider=connection_provider,
+            maas_repository=MAASRepository(connection_provider=connection_provider),
             webhook_secret=webhook_secret
         )
         services.users_service = UsersService(
