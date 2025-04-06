@@ -24,7 +24,6 @@ class UsersService(Service):
 
     async def login(self, username: str, password: str) -> Optional[User]:
         user = await self.users_repository.find_by_username(username)
-        print(user)
         if user and user.password == self._hash_password(password):
             return user
         return None

@@ -33,7 +33,7 @@ class GithubWorkflowRunnerService(Service):
         self.maas_repository = maas_repository
 
     def is_continuous_deliver_pipeline(self, workflow: WorkflowJob):
-        return "Continuous delivery pipeline" == workflow.workflow_name and "master" == workflow.head_branch
+        return "Continuous delivery" == workflow.workflow_name and "master" == workflow.head_branch
 
     async def list_commits(self, query: str | None, page: int, size: int):
         return await self.maas_repository.list_commits(query, page, size)

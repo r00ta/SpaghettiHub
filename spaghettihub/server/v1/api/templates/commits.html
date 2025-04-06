@@ -118,16 +118,17 @@
             <div class="row">
                 <div class="col-8">
                     <h3>
-                        SHA: {{ commit.commit_sha  }}
+                        commit: {{ commit.commit_sha  }}
                     </h3>
-                    <button class="p-chip--information">
-                        <span class="p-chip__lead">Commit date:</span>
-                        <span class="p-chip__value">{{ commit.commit_date }}</span>
-                    </button>
                     <br>
                     <button class="p-chip">
                         <span class="p-chip__lead">Author</span>
                         <span class="p-chip__value">{{ commit.committer_username }}</span>
+                    </button>
+                    <br>
+                    <button class="p-chip--information">
+                        <span class="p-chip__lead">Date:</span>
+                        <span class="p-chip__value">{{ commit.commit_date }}</span>
                     </button>
                     <br>
                     {% if commit.continuous_delivery_test_deb_status is none %}
