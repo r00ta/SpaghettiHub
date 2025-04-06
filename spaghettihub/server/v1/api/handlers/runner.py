@@ -62,7 +62,7 @@ class GithubWorkflowRunnerHandler(Handler):
         Serve the search page.
         """
         commits = await services.github_workflow_runner_service.list_commits(
-            "",
+            None,
             1,
             10
         )

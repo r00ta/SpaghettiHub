@@ -49,18 +49,20 @@ class MAASRepository(BaseRepository[MAAS]):
         return MAAS(**maas._asdict())
 
     async def list_commits(self, query: str | None, size: int, page: int) -> ListResult[MAAS]:
-        total_stmt = select(count()).select_from(MAASTable).where(
-            MAASTable.c.commit_sha.like("%" + query + "%"))
+        total_stmt = select(count()).select_from(MAASTable)
+        if query:
+            total_stmt = total_stmt.where(MAASTable.c.commit_sha.like("%" + query + "%"))
         total = (await self.connection_provider.get_current_connection().execute(total_stmt)).scalar()
 
         stmt = (
             select("*")
             .select_from(MAASTable)
-            .where(MAASTable.c.commit_sha.like("%" + query + "%"))
             .order_by(desc(MAASTable.c.commit_date))
             .offset((page - 1) * size)
             .limit(size)
         )
+        if query:
+            stmt = stmt.where(MAASTable.c.commit_sha.like("%" + query + "%"))
 
         result = await self.connection_provider.get_current_connection().execute(stmt)
         return ListResult[MAAS](

@@ -103,7 +103,7 @@
         </section>
     </div>
     {% if results  %}
-    {% if query is not "" %}
+    {% if query != '' %}
     <div class="l-docs__title" id="main-content">
         <div class="p-section--shallow">
             <div class="u-fixed-width">
@@ -130,13 +130,13 @@
                         <span class="p-chip__value">{{ commit.committer_username }}</span>
                     </button>
                     <br>
-                    {% if continuous_delivery_test_status is None %}
+                    {% if commit.continuous_delivery_test_status is none %}
                         <button class="p-chip--information">
-                    {% elif continuous_delivery_test_status == "success" %}
+                    {% elif commit.continuous_delivery_test_status == "success" %}
                         <button class="p-chip--positive">
-                    {% elif continuous_delivery_test_status == "failure" %}
+                    {% elif commit.continuous_delivery_test_status == "failure" %}
                         <button class="p-chip--negative">
-                    {% else continuous_delivery_test_status == "success" %}
+                    {% else %}
                         <button class="p-chip--caution">
                     {% endif %}
                         <span class="p-chip__lead">Test status:</span>
