@@ -6,9 +6,7 @@ from starlette.templating import Jinja2Templates
 from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.server.base.api.base import Handler, handler
 from spaghettihub.server.v1.api import services
-from spaghettihub.server.v1.api.models.requests.base import PaginationParams
-from spaghettihub.server.v1.api.models.requests.merge_proposals import \
-    MergeProposalMessageMatch
+from spaghettihub.server.v1.api.models.requests.base import PaginationParams, QuerySearchParam
 from spaghettihub.server.v1.api.models.responses.merge_proposals import (
     MergeProposalResponse, MergeProposalsListResponse)
 
@@ -50,7 +48,7 @@ class MergeProposalsHandler(Handler):
             request: Request,
             services: ServiceCollection = Depends(services),
             pagination_params: PaginationParams = Depends(),
-            message_query_param: MergeProposalMessageMatch = Depends(),
+            message_query_param: QuerySearchParam = Depends(),
     ):
         merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message(
             message_query_param.query,
@@ -81,7 +79,7 @@ class MergeProposalsHandler(Handler):
             self,
             services: ServiceCollection = Depends(services),
             pagination_params: PaginationParams = Depends(),
-            message_query_param: MergeProposalMessageMatch = Depends(),
+            message_query_param: QuerySearchParam = Depends(),
     ) -> MergeProposalsListResponse:
         merge_proposals = await services.merge_proposals_service.find_merge_proposals_contain_message(
             message_query_param.message,

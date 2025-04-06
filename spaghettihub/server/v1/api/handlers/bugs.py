@@ -6,8 +6,7 @@ from starlette.templating import Jinja2Templates
 from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.server.base.api.base import Handler, handler
 from spaghettihub.server.v1.api import services
-from spaghettihub.server.v1.api.models.requests.base import PaginationParams
-from spaghettihub.server.v1.api.models.requests.bugs import BugsSearchParam
+from spaghettihub.server.v1.api.models.requests.base import PaginationParams, QuerySearchParam
 
 templates_path = Path(__file__).resolve().parent.parent / 'templates'
 templates = Jinja2Templates(directory=str(templates_path))
@@ -48,7 +47,7 @@ class BugsHandler(Handler):
             request: Request,
             services: ServiceCollection = Depends(services),
             pagination_params: PaginationParams = Depends(),
-            search: BugsSearchParam = Depends(),
+            search: QuerySearchParam = Depends(),
     ):
         bugs = await services.embeddings_service.find_similar_issues(search.query, pagination_params.size)
         return templates.TemplateResponse(

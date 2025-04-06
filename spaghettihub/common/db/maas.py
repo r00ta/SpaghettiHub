@@ -1,12 +1,12 @@
 from typing import Optional
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, insert, select, update, desc
+from sqlalchemy.sql.functions import count
 
 from spaghettihub.common.db.repository import BaseRepository
 from spaghettihub.common.db.sequences import (MAASSequence)
 from spaghettihub.common.db.tables import (MAASTable)
 from spaghettihub.common.models.base import ListResult
-from spaghettihub.common.models.github import LaunchpadToGithubWork
 from spaghettihub.common.models.maas import MAAS
 
 
@@ -45,9 +45,25 @@ class MAASRepository(BaseRepository[MAAS]):
             return None
         return MAAS(**maas._asdict())
 
-    async def list(self, size: int, page: int) -> ListResult[LaunchpadToGithubWork]:
-        pass
+    async def list_commits(self, query: str | None, size: int, page: int) -> ListResult[MAAS]:
+        total_stmt = select(count()).select_from(MAASTable).where(
+            MAASTable.c.commit_sha.like("%" + query + "%"))
+        total = (await self.connection_provider.get_current_connection().execute(total_stmt)).scalar()
 
+        stmt = (
+            select("*")
+            .select_from(MAASTable)
+            .where(MAASTable.c.commit_sha.like("%" + query + "%"))
+            .order_by(desc(MAASTable.c.commit_date))
+            .offset((page - 1) * size)
+            .limit(size)
+        )
+
+        result = await self.connection_provider.get_current_connection().execute(stmt)
+        return ListResult[MAAS](
+            items=[MAAS(**row._asdict()) for row in result.all()],
+            total=total
+        )
     async def update(self, entity: MAAS) -> MAAS:
         stmt = (
             update(MAASTable)

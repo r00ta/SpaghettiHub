@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>SpaghettiHub - Continuous delivery on MAAS commits.</title>
+    <link
+            rel="stylesheet"
+            href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.10.0.min.css"
+    />
+</head>
+<body>
+<div class="l-docs is-paper">
+    <div class="l-docs__header">
+        <header id="navigation" class="p-navigation is-dark">
+            <div class="l-docs__subgrid">
+                <div class="l-docs__sidebar">
+                    <div class="p-navigation__banner">
+                        <div class="p-navigation__tagged-logo">
+                            <a class="p-navigation__link" href="/">
+                                <div class="p-navigation__logo-tag">
+                                    <img
+                                            class="p-navigation__logo-icon"
+                                            src="https://www.svgrepo.com/show/398366/spaghetti.svg"
+                                            alt=""
+                                    />
+                                </div>
+                                <span class="p-navigation__logo-title"
+                                >SpaghettiHub</span
+                                >
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ul class="p-navigation__items">
+                <li class="p-navigation__item">
+                </li>
+                <li class="p-navigation__item">
+                    {% if not user %}
+                    <a class="p-navigation__link" href="/v1/login">
+                        Login
+                    </a>
+                    {% else %}
+                    <a class="p-navigation__link" href="/v1/logout">
+                        Logout
+                    </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </header>
+        <section class="p-strip is-bordered l-docs__subgrid">
+            <div class="l-docs__main">
+                <div class="u-fixed-width">
+                    <div class="p-heading-icon">
+                        <div class="p-heading-icon__header is-stacked">
+                            <h3 class="p-heading-icon__title">Continuous delivery status for MAAS master branch</h3>
+                        </div>
+                    </div>
+                    <form
+                            method="get"
+                            action="/v1/commits:search"
+                            class="p-form p-form--inline"
+                    >
+                        <div class="p-form__group">
+                            <label for="search-input" class="p-form__label"
+                            >Commit sha</label
+                            >
+                            <input
+                                    type="text"
+                                    id="search-input"
+                                    class="p-search-box__input"
+                                    name="query"
+                                    placeholder="Enter search query"
+                                    value="{{query}}"
+                                    required
+                            />
+                        </div>
+                        <div class="p-form__group">
+                            <label for="size" class="p-form__label">Size</label>
+                            <div class="p-form__control">
+                                <input
+                                        type="number"
+                                        class="p-form__input"
+                                        id="size"
+                                        name="size"
+                                        value="{{size}}"
+                                        min="1"
+                                        max="1000"
+                                />
+                            </div>
+                        </div>
+                        <div class="p-form__group">
+                            <button
+                                    type="submit"
+                                    class="p-button--positive u-align--right"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    {% if results  %}
+    {% if query is not "" %}
+    <div class="l-docs__title" id="main-content">
+        <div class="p-section--shallow">
+            <div class="u-fixed-width">
+                <h1 class="u-no-margin--bottom">Results for "{{ query }}"</h1>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="l-docs__main u-fixed-width">
+        {% for commit in results %}
+        <div class="p-strip is-bordered is-shallow">
+            <div class="row">
+                <div class="col-8">
+                    <h3>
+                        {{ commit.commit_sha  }}
+                    </h3>
+                    <button class="p-chip--information">
+                        <span class="p-chip__lead">Commit date:</span>
+                        <span class="p-chip__value">{{ commit.commit_date }}</span>
+                    </button>
+                    <br>
+                    <button class="p-chip">
+                        <span class="p-chip__lead">Author</span>
+                        <span class="p-chip__value">{{ commit.committer_username }}</span>
+                    </button>
+                    <br>
+                    {% if continuous_delivery_test_status is None %}
+                        <button class="p-chip--information">
+                    {% elif continuous_delivery_test_status == "success" %}
+                        <button class="p-chip--positive">
+                    {% elif continuous_delivery_test_status == "failure" %}
+                        <button class="p-chip--negative">
+                    {% else continuous_delivery_test_status == "success" %}
+                        <button class="p-chip--caution">
+                    {% endif %}
+                        <span class="p-chip__lead">Test status:</span>
+                        <span class="p-chip__value">{{ commit.continuous_delivery_test_status }}</span>
+                    </button>
+                    <br>
+                    <h5>
+                        {{ commit.commit_message }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>

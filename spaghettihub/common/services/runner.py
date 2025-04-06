@@ -35,6 +35,9 @@ class GithubWorkflowRunnerService(Service):
     def is_continuous_deliver_pipeline(self, workflow: WorkflowJob):
         return "Continuous delivery pipeline" == workflow.workflow_name and "master" == workflow.head_branch
 
+    async def list_commits(self, query: str | None, page: int, size: int):
+        return await self.maas_repository.list_commits(query, page, size)
+
     async def process_push_webhook(self, request: GithubPushWebhook):
         if request.ref != "refs/heads/master":
             return

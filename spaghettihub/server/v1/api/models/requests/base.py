@@ -10,3 +10,6 @@ class PaginationParams(BaseModel):
 
     page: int = Field(Query(default=1, ge=1))
     size: int = Field(Query(default=DEFAULT_PAGE_SIZE, le=MAX_PAGE_SIZE, ge=1))
+
+class QuerySearchParam(BaseModel):
+    query: str = Field(Query())
