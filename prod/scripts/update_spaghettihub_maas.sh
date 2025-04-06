@@ -34,9 +34,14 @@ while [ "$(git rev-list tmp-origin..HEAD | wc -l)" -gt 0 ]; do
 
     # Push it to origin/master
     git push origin HEAD:master
+    git checkout master
+    git branch -D tmp-origin
 
-    # Update tmp-origin to this commit
-    git branch -f tmp-origin "$NEXT_COMMIT"
+    # Create a temporary branch based on origin/master
+    git checkout -B tmp-origin origin/master
+
+    # Rebase lp/master onto origin/master, one commit at a time
+    git rebase --onto tmp-origin origin/master lp/master
 done
 
 # Switch back to master (or main) and delete tmp-origin
