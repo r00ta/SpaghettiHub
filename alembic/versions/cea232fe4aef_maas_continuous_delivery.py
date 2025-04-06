@@ -28,7 +28,8 @@ def upgrade() -> None:
         sa.Column("commit_message", sa.Text, nullable=True),
         sa.Column("committer_username", sa.String(128), nullable=True),
         sa.Column("commit_date", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("continuous_delivery_test_status", sa.String(64), nullable=True),
+        sa.Column("continuous_delivery_test_deb_status", sa.String(64), nullable=True),
+        sa.Column("continuous_delivery_test_snap_status", sa.String(64), nullable=True),
     )
 
 
