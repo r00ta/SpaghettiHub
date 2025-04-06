@@ -70,13 +70,14 @@ class GithubWorkflowRunnerService(Service):
             maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
             if maas is None:
                 log.warning(f"Could not find commit with sha {request.workflow_job.head_sha}. Creating it")
-            maas = MAAS(
-                id=await self.maas_repository.get_next_id(),
-                commit_sha=request.workflow_job.head_sha,
-                commit_message=None,
-                committer_username=None,
-                commit_date=None,
-            )
+                maas = MAAS(
+                    id=await self.maas_repository.get_next_id(),
+                    commit_sha=request.workflow_job.head_sha,
+                    commit_message=None,
+                    committer_username=None,
+                    commit_date=None,
+                )
+                await self.maas_repository.create(maas)
             if request.workflow_job.name == "deb":
                 maas.continuous_delivery_test_deb_status = request.workflow_job.conclusion
             elif request.workflow_job.name == "snap":
