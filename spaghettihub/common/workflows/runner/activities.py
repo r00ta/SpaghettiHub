@@ -45,12 +45,12 @@ runcmd:
   - usermod -a -G lxd runner
   - su runner -c "git config --global user.name 'r00tabot runner'"
   - su runner -c "git config --global user.email example@example.com"
-  - su runner -c "mkdir -p /tmp/actions-runner"
-  - su runner -c "curl -o /tmp/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz"
-  - su runner -c "echo '0dbc9bf5a58620fc52cb6cc0448abcca964a8d74b5f39773b7afcad9ab691e19  /tmp/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz' | shasum -a 256 -c"
-  - su runner -c "cd /tmp/actions-runner && tar xzf ./actions-runner-linux-x64-2.323.0.tar.gz"
-  - su runner -c "python3 -c 'print(); print(\"{params.id}\")' | /tmp/actions-runner/config.sh --url https://github.com/SpaghettiHub/maas --token {params.registration_token} --labels {",".join(params.labels)} --ephemeral"
-  - su runner -c "/tmp/actions-runner/run.sh &"
+  - su runner -c "mkdir -p /home/runner/actions-runner"
+  - su runner -c "curl -o /home/runner/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz"
+  - su runner -c "echo '0dbc9bf5a58620fc52cb6cc0448abcca964a8d74b5f39773b7afcad9ab691e19  /home/runner/actions-runner/actions-runner-linux-x64-2.323.0.tar.gz' | shasum -a 256 -c"
+  - su runner -c "cd /home/runner/actions-runner && tar xzf ./actions-runner-linux-x64-2.323.0.tar.gz"
+  - su runner -c "python3 -c 'print(); print(\"{params.id}\")' | /home/runner/actions-runner/config.sh --url https://github.com/SpaghettiHub/maas --token {params.registration_token} --labels {",".join(params.labels)} --ephemeral"
+  - su runner -c "/home/runner/actions-runner/run.sh &"
 """
         config = {
             "name": self.build_vm_name(params.id),
