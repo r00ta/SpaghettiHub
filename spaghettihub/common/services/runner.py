@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import logging
 import uuid
+from datetime import datetime
 
 from temporalio.client import Client
 from temporalio.service import RPCError
@@ -61,7 +62,7 @@ class GithubWorkflowRunnerService(Service):
             maas.commit_sha = request.head_commit.id
             maas.commit_message = request.head_commit.message
             maas.committer_username = request.head_commit.author.username
-            maas.commit_date = request.head_commit.timestamp
+            maas.commit_date = datetime.fromisoformat(request.head_commit.timestamp)
             await self.maas_repository.update(maas)
         else:
             await self.maas_repository.create(
