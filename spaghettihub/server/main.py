@@ -104,7 +104,7 @@ def run():
     )
     server_config = uvicorn.Config(
         loop.run_until_complete(create_app(config=app_config)),
-        loop=loop,
+        loop="none",
         proxy_headers=True,
         host=args.host,
         port=args.port,
