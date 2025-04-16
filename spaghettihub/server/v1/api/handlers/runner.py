@@ -32,7 +32,7 @@ class GithubWorkflowRunnerHandler(Handler):
             services: ServiceCollection = Depends(services)
     ):
         services.github_workflow_runner_service.verify_signature(await request.body(), request.headers.get("x-hub-signature-256"))
-        await services.github_workflow_runner_service.process_webhook(typed_request)
+        await services.github_workflow_runner_service.queue_workflow_webhook(typed_request)
 
     @handler(
         path="/push_webhook",
@@ -48,7 +48,7 @@ class GithubWorkflowRunnerHandler(Handler):
             services: ServiceCollection = Depends(services)
     ):
         services.github_workflow_runner_service.verify_signature(await request.body(), request.headers.get("x-hub-signature-256"))
-        await services.github_workflow_runner_service.process_push_webhook(typed_request)
+        await services.github_workflow_runner_service.queue_push_webhook(typed_request)
 
     @handler(
         path="/commits",

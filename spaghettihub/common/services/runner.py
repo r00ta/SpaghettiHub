@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import logging
+import uuid
 
 from temporalio.client import Client
 from temporalio.service import RPCError
@@ -27,13 +28,12 @@ class GithubWorkflowRunnerService(Service):
             connection_provider: ConnectionProvider,
             maas_repository: MAASRepository,
             webhook_secret: str,
+            temporal_client: Client | None = None
     ):
         super().__init__(connection_provider)
         self.webhook_secret = webhook_secret
         self.maas_repository = maas_repository
-
-    def is_continuous_deliver_pipeline(self, workflow: WorkflowJob):
-        return "Continuous delivery" == workflow.workflow_name and "master" == workflow.head_branch
+        self.temporal_client = temporal_client
 
     async def list_commits(self, query: str | None, page: int, size: int):
         return await self.maas_repository.list_commits(query, page, size)
@@ -41,16 +41,26 @@ class GithubWorkflowRunnerService(Service):
     async def list(self, page: int, size: int):
         pass
 
+    async def queue_push_webhook(self, request: GithubPushWebhook):
+        """ Put the request in a temporal workflow so to process it asyncronously """
+        await self.temporal_client.start_workflow(
+            "github-push-webhook-workflow",
+            request,
+            id="github-push-webhook-workflow-" + str(request.head_commit.id),
+            task_queue=TASK_QUEUE_NAME,
+        )
+
     async def process_push_webhook(self, request: GithubPushWebhook):
+        """ Called from the temporal workflow """
         if request.ref != "refs/heads/master":
             return
 
         # Should not happen, but it might be that the workflow job was processed before.
         maas = await self.maas_repository.find_by_sha(request.head_commit.id)
         if maas is not None:
-            maas.commit_sha = request.head_commit.id,
-            maas.commit_message = request.head_commit.message,
-            maas.committer_username = request.head_commit.author.username,
+            maas.commit_sha = request.head_commit.id
+            maas.commit_message = request.head_commit.message
+            maas.committer_username = request.head_commit.author.username
             maas.commit_date = request.head_commit.timestamp
             await self.maas_repository.update(maas)
         else:
@@ -64,56 +74,32 @@ class GithubWorkflowRunnerService(Service):
                 )
             )
 
-    async def process_webhook(self, request: GithubWebhook):
-        # Specific handling for this job triggered when something has been pushed to main
-        if self.is_continuous_deliver_pipeline(request.workflow_job):
-            maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
-            if maas is None:
-                log.warning(f"Could not find commit with sha {request.workflow_job.head_sha}. Creating it")
-                maas = MAAS(
-                    id=await self.maas_repository.get_next_id(),
-                    commit_sha=request.workflow_job.head_sha,
-                    commit_message=None,
-                    committer_username=None,
-                    commit_date=None,
-                )
-                await self.maas_repository.create(maas)
-            if request.workflow_job.name == "deb":
-                maas.continuous_delivery_test_deb_status = request.workflow_job.conclusion
-            elif request.workflow_job.name == "snap":
-                maas.continuous_delivery_test_snap_status = request.workflow_job.conclusion
-            await self.maas_repository.update(maas)
+    async def queue_workflow_webhook(self, request: GithubWebhook):
+        """ Handle the webhook """
+        await self.temporal_client.start_workflow(
+            "handle-github-workflow-webhook-workflow",
+            request,
+            id="handle-github-workflow-webhook-workflow-" + str(uuid.uuid4()),
+            task_queue=TASK_QUEUE_NAME,
+        )
 
-        if request.action == WorkflowAction.queued:
-            if "self-hosted" not in request.workflow_job.labels:
-                return
-
-            client = await Client.connect("localhost:7233")
-
-            await client.start_workflow(
-                "github-runner-workflow",
-                TemporalGithubRunnerWorkflowParams(
-                    id=request.workflow_job.id,
-                    run_url=request.workflow_job.run_url,
-                    labels=request.workflow_job.labels,
-                ),
-                id="github-runner-workflow-" + str(request.workflow_job.id),
-                task_queue=TASK_QUEUE_NAME,
+    async def update_continuous_delivery_commit_metadata(self, request: GithubWebhook):
+        maas = await self.maas_repository.find_by_sha(request.workflow_job.head_sha)
+        if maas is None:
+            log.warning(f"Could not find commit with sha {request.workflow_job.head_sha}. Creating it")
+            maas = MAAS(
+                id=await self.maas_repository.get_next_id(),
+                commit_sha=request.workflow_job.head_sha,
+                commit_message=None,
+                committer_username=None,
+                commit_date=None,
             )
-            log.info(f"New runner workflow {str(request.workflow_job.id)}")
-        elif request.action == WorkflowAction.completed:
-            if "self-hosted" not in request.workflow_job.labels:
-                return
-
-            client = await Client.connect("localhost:7233")
-
-            # The runner name is the id of the workflow that handled the workload.
-            hdl = client.get_workflow_handle("internal-github-runner-workflow-" + str(request.workflow_job.runner_name))
-            try:
-                await hdl.signal("completed")
-                log.info(f"Workflow {str(request.workflow_job.id)} has been signaled")
-            except RPCError:
-                log.warning(f"Could not signal the workflow {str(request.workflow_job.id)}")
+            await self.maas_repository.create(maas)
+        if request.workflow_job.name == "deb":
+            maas.continuous_delivery_test_deb_status = request.workflow_job.conclusion
+        elif request.workflow_job.name == "snap":
+            maas.continuous_delivery_test_snap_status = request.workflow_job.conclusion
+        await self.maas_repository.update(maas)
 
     def verify_signature(self, payload_body, signature_header):
         """Verify that the payload was sent from GitHub by validating SHA256.

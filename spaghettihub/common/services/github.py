@@ -18,10 +18,12 @@ class LaunchpadToGithubWorkService(Service):
     def __init__(
             self,
             connection_provider: ConnectionProvider,
-            launchpad_to_github_work_repository: LaunchpadToGithubWorkRepository
+            launchpad_to_github_work_repository: LaunchpadToGithubWorkRepository,
+            temporal_client: Client | None = None
     ):
         super().__init__(connection_provider)
         self.launchpad_to_github_work_repository = launchpad_to_github_work_repository
+        self.temporal_client = temporal_client
 
     async def create(self, launchpad_url: str) -> LaunchpadToGithubWork:
         request_uuid = str(uuid.uuid4())
@@ -36,9 +38,7 @@ class LaunchpadToGithubWorkService(Service):
             )
         )
 
-        client = await Client.connect("localhost:7233")
-
-        await client.start_workflow(
+        await self.temporal_client.start_workflow(
             "launchpad-to-github-workflow",
             TemporalLaunchpadToGithubParams(
                 request_uuid=request_uuid,

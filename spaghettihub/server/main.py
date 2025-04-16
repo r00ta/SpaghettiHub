@@ -1,9 +1,11 @@
 import argparse
+import asyncio
 import logging
 
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
+from temporalio.client import Client
 from transformers import AutoModel, AutoTokenizer
 
 from spaghettihub.common.services.embeddings import EmbeddingsCache
@@ -58,7 +60,7 @@ def make_arg_parser():
     return parser
 
 
-def create_app(config: Config) -> FastAPI:
+async def create_app(config: Config) -> FastAPI:
     """Create the FastAPI application."""
 
     db = Database(config.db, echo=config.debug_queries)
@@ -76,7 +78,9 @@ def create_app(config: Config) -> FastAPI:
         model=AutoModel.from_pretrained("BAAI/bge-large-en-v1.5"),
         tokenizer=AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
     )
-    app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache, webhook_secret=config.webhook_secret)
+
+    temporal_client = await Client.connect("localhost:7233")
+    app.add_middleware(ServicesV1Middleware, embeddings_cache=embeddings_cache, webhook_secret=config.webhook_secret, temporal_client=temporal_client)
     app.add_middleware(TransactionMiddleware, db=db)
     app.add_middleware(
         SessionMiddleware,
@@ -93,13 +97,14 @@ def run():
     parser = make_arg_parser()
     args = parser.parse_args()
 
+    loop = asyncio.new_event_loop()
     app_config = read_config(secret=args.secret, webhook_secret=args.webhook_secret)
     logging.basicConfig(
         level=logging.INFO
     )
     server_config = uvicorn.Config(
-        create_app(config=app_config),
-        loop="asyncio",
+        loop.run_until_complete(create_app(config=app_config)),
+        loop=loop,
         proxy_headers=True,
         host=args.host,
         port=args.port,
@@ -108,4 +113,4 @@ def run():
         ssl_ca_certs=args.ssl_ca_certs
     )
     server = uvicorn.Server(server_config)
-    server.run()
+    loop.run_until_complete(server.run())

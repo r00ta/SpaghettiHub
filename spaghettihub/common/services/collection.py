@@ -1,3 +1,5 @@
+from temporalio.client import Client
+
 from spaghettihub.common.db.base import ConnectionProvider
 from spaghettihub.common.db.bugs import BugsRepository
 from spaghettihub.common.db.embeddings import EmbeddingsRepository
@@ -30,7 +32,7 @@ class ServiceCollection:
 
     @classmethod
     def produce(cls, connection_provider: ConnectionProvider, embeddings_cache: EmbeddingsCache | None = None,
-                webhook_secret: str | None = None) -> "ServiceCollection":
+                webhook_secret: str | None = None, temporal_client: Client | None = None) -> "ServiceCollection":
         services = cls()
         services.last_update_service = LastUpdateService(
             connection_provider=connection_provider,
@@ -69,11 +71,13 @@ class ServiceCollection:
             launchpad_to_github_work_repository=LaunchpadToGithubWorkRepository(
                 connection_provider=connection_provider
             ),
+            temporal_client=temporal_client
         )
         services.github_workflow_runner_service = GithubWorkflowRunnerService(
             connection_provider=connection_provider,
             maas_repository=MAASRepository(connection_provider=connection_provider),
-            webhook_secret=webhook_secret
+            webhook_secret=webhook_secret,
+            temporal_client=temporal_client
         )
         services.users_service = UsersService(
             connection_provider=connection_provider,

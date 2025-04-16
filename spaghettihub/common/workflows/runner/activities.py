@@ -2,6 +2,9 @@ import aiohttp
 from pylxd import Client
 from temporalio import activity
 
+from spaghettihub.common.db.base import ConnectionProvider
+from spaghettihub.common.models.runner import GithubPushWebhook, GithubWebhook
+from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.common.workflows.base import ActivityBase
 from spaghettihub.common.workflows.runner.params import SpawnVirtualMachineActivityParams
 from spaghettihub.server.base.db.database import Database
@@ -64,8 +67,8 @@ runcmd:
             },
             "config": {
                 "user.user-data": user_data,
-                'limits.cpu': '2' if "large-runner" in params.labels else '1',
-                'limits.memory': '16GiB' if "large-runner" in params.labels else '4GiB'
+                'limits.cpu': '4' if "large-runner" in params.labels else '1',
+                'limits.memory': '24GiB' if "large-runner" in params.labels else '4GiB'
             },
             "devices": {
                 "root": {
@@ -84,6 +87,24 @@ runcmd:
         instance = self.lxd_client.instances.get(self.build_vm_name(id))
         instance.stop()
         instance.delete()
+
+    @activity.defn(name="update-commit-metadata")
+    async def update_commit_metadata(self, request: GithubPushWebhook) -> None:
+        async with self.start_transaction() as connection:
+            connection_provider = ConnectionProvider(
+                current_connection=connection)
+            services = ServiceCollection.produce(
+                connection_provider=connection_provider)
+            await services.github_workflow_runner_service.process_push_webhook(request)
+
+    @activity.defn(name="update-continuous-delivery-commit-metadata")
+    async def update_continuous_delivery_commit_metadata(self, request: GithubWebhook) -> None:
+        async with self.start_transaction() as connection:
+            connection_provider = ConnectionProvider(
+                current_connection=connection)
+            services = ServiceCollection.produce(
+                connection_provider=connection_provider)
+            await services.github_workflow_runner_service.update_continuous_delivery_commit_metadata(request)
 
     def build_vm_name(self, id: int) -> str:
         return f"runner-{id}"

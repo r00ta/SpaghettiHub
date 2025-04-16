@@ -75,7 +75,7 @@ class LaunchpadToGithubActivity(ActivityBase):
         update_command = ("cd /tmp/maas-mirror-fork && "
                           "git fetch mirror && "
                           "git fetch origin && "
-                          "git merge mirror/master --no-ff --no-edit && "
+                          "git merge mirror/master && "
                           "git push origin master"
                           )
         subprocess.run(update_command, shell=True)

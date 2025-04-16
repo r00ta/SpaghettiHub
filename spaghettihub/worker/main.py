@@ -11,7 +11,8 @@ from spaghettihub.common.workflows.launchpad_to_github.workflow import (
     TemporalInternalLaunchpadToGithubWorkflow,
     TemporalLaunchpadToGithubWorkflow)
 from spaghettihub.common.workflows.runner.activities import GithubRunnerActivity
-from spaghettihub.common.workflows.runner.workflow import TemporalGithubRunnerWorkflow, TemporalInternalGithubRunnerWorkflow
+from spaghettihub.common.workflows.runner.workflow import TemporalGithubRunnerWorkflow, TemporalInternalGithubRunnerWorkflow, \
+    GithubWorkflowWebhookRunnerWorkflow, GithubPushWebhookWorkflow
 from spaghettihub.server.base.db.database import Database
 from spaghettihub.server.settings import read_config
 
@@ -29,7 +30,9 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
         workflows=[TemporalLaunchpadToGithubWorkflow,
                    TemporalInternalLaunchpadToGithubWorkflow,
                    TemporalGithubRunnerWorkflow,
-                   TemporalInternalGithubRunnerWorkflow
+                   TemporalInternalGithubRunnerWorkflow,
+                   GithubWorkflowWebhookRunnerWorkflow,
+                   GithubPushWebhookWorkflow
                    ],
         activities=[
             launchpad_to_github_activity.retrieve_merge_proposal_diff_from_launchpad,
@@ -40,7 +43,9 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
             launchpad_to_github_activity.complete_request,
             github_runner_activity.get_registration_token,
             github_runner_activity.spawn_runner,
-            github_runner_activity.destroy_runner
+            github_runner_activity.destroy_runner,
+            github_runner_activity.update_commit_metadata,
+            github_runner_activity.update_continuous_delivery_commit_metadata,
         ],
     )
     await worker.run()
