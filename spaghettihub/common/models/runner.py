@@ -41,7 +41,7 @@ class GithubCommit(BaseModel):
     id: str
     author: CommitAuthor
     message: str
-    timestamp: datetime
+    timestamp: str
 
 
 class GithubPushWebhook(BaseModel):
