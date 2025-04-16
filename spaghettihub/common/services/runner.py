@@ -44,9 +44,9 @@ class GithubWorkflowRunnerService(Service):
     async def queue_push_webhook(self, request: GithubPushWebhook):
         """ Put the request in a temporal workflow so to process it asyncronously """
         await self.temporal_client.start_workflow(
-            "github-push-webhook-workflow",
+            "handle-github-push-webhook-workflow",
             request,
-            id="github-push-webhook-workflow-" + str(request.head_commit.id),
+            id="handle-github-push-webhook-workflow-" + str(request.head_commit.id),
             task_queue=TASK_QUEUE_NAME,
         )
 
