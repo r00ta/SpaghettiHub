@@ -85,7 +85,7 @@ runcmd:
     @activity.defn(name="destroy-runner")
     async def destroy_runner(self, id: int) -> None:
         instance = self.lxd_client.instances.get(self.build_vm_name(id))
-        instance.stop()
+        instance.stop(force=True)
         instance.delete()
 
     @activity.defn(name="update-commit-metadata")
