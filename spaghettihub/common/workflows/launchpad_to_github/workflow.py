@@ -60,12 +60,6 @@ class TemporalInternalLaunchpadToGithubWorkflow:
         )
 
         request_dir = WORK_DIR + params.request_uuid + "/"
-        await workflow.execute_activity(
-            "update-github-master-branch",
-            request_dir,
-            start_to_close_timeout=timedelta(seconds=60),
-            heartbeat_timeout=timedelta(seconds=60)
-        )
 
         await workflow.execute_activity(
             "update-github-fork-master-branch",

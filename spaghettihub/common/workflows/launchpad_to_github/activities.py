@@ -42,25 +42,6 @@ class LaunchpadToGithubActivity(ActivityBase):
                 diff = await response.text()
                 return diff
 
-    @activity.defn(name="update-github-master-branch")
-    async def update_github_master_branch(self, target_dir: str) -> None:
-        if not os.path.exists("/tmp/maas-mirror"):
-            command = ("git clone git@github.com:SpaghettiHub/maas.git /tmp/maas-mirror && "
-                       "cd /tmp/maas-mirror && "
-                       "git remote add lp https://git.launchpad.net/maas && "
-                       "git remote update"
-                       )
-            subprocess.run(command, shell=True)
-            activity.heartbeat()
-
-        update_command = ("cd /tmp/maas-mirror && "
-                          "git fetch lp && "
-                          "git fetch origin && "
-                          "git merge lp/master && "
-                          "git push origin master"
-                          )
-        subprocess.run(update_command, shell=True)
-
     @activity.defn(name="update-github-fork-master-branch")
     async def update_github_fork_master_branch(self, target_dir: str) -> None:
         if not os.path.exists("/tmp/maas-mirror-fork"):
@@ -75,8 +56,8 @@ class LaunchpadToGithubActivity(ActivityBase):
         update_command = ("cd /tmp/maas-mirror-fork && "
                           "git fetch mirror && "
                           "git fetch origin && "
-                          "git merge mirror/master && "
-                          "git push origin master"
+                          "git reset --hard mirror/master && "
+                          "git push origin master -f"
                           )
         subprocess.run(update_command, shell=True)
 

@@ -36,7 +36,6 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
                    ],
         activities=[
             launchpad_to_github_activity.retrieve_merge_proposal_diff_from_launchpad,
-            launchpad_to_github_activity.update_github_master_branch,
             launchpad_to_github_activity.update_github_fork_master_branch,
             launchpad_to_github_activity.create_github_branch_for_pull_request,
             launchpad_to_github_activity.create_github_pull_request,
