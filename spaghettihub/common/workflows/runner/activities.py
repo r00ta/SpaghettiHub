@@ -67,7 +67,7 @@ runcmd:
             },
             "config": {
                 "user.user-data": user_data,
-                'limits.cpu': '4' if "large-runner" in params.labels else '1',
+                'limits.cpu': '6' if "large-runner" in params.labels else '4',
                 'limits.memory': '24GiB' if "large-runner" in params.labels else '4GiB'
             },
             "devices": {
