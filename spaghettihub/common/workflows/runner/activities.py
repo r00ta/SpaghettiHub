@@ -55,6 +55,18 @@ runcmd:
   - su runner -c "python3 -c 'print(); print(\"{params.id}\")' | /home/runner/actions-runner/config.sh --url https://github.com/SpaghettiHub/maas --token {params.registration_token} --labels {",".join(params.labels)} --ephemeral"
   - su runner -c "/home/runner/actions-runner/run.sh &"
 """
+        cpu = "2"
+        memory = "4GiB"
+        disk =  "8GiB"
+        if "medium-runner" in params.labels:
+            cpu = "4"
+            memory = "8GiB"
+            disk = "16GiB"
+        if "large-runner" in params.labels:
+            cpu = "6"
+            memory = "20GiB"
+            disk = "50GiB"
+
         config = {
             "name": self.build_vm_name(params.id),
             "type": "virtual-machine",
@@ -67,14 +79,14 @@ runcmd:
             },
             "config": {
                 "user.user-data": user_data,
-                'limits.cpu': '6' if "large-runner" in params.labels else '4',
-                'limits.memory': '24GiB' if "large-runner" in params.labels else '4GiB'
+                'limits.cpu': cpu,
+                'limits.memory': memory
             },
             "devices": {
                 "root": {
                     "path": "/",
                     "type": "disk",
-                    "size": "50GiB" if "large-runner" in params.labels else "8GiB",
+                    "size": disk,
                     "pool": "default"
                 }
             }
