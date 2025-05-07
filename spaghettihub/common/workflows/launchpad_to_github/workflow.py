@@ -7,7 +7,7 @@ from temporalio.common import RetryPolicy
 
 from spaghettihub.common.workflows.constants import TASK_QUEUE_NAME
 from spaghettihub.common.workflows.launchpad_to_github.params import \
-    TemporalLaunchpadToGithubParams
+    TemporalLaunchpadToGithubParams, MergeProposalDetails
 
 with workflow.unsafe.imports_passed_through():
     from spaghettihub.common.workflows.launchpad_to_github.activities import (
@@ -52,12 +52,14 @@ class TemporalInternalLaunchpadToGithubWorkflow:
         if not os.path.exists(WORK_DIR):
             os.makedirs(WORK_DIR)
 
-        merge_proposal_details = await workflow.execute_activity(
+        merge_proposal_details_dict = await workflow.execute_activity(
             "retrieve-merge-proposal-from-launchpad",
             params.merge_proposal_link,
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)
         )
+
+        merge_proposal_details = MergeProposalDetails(**merge_proposal_details_dict)
 
         request_dir = WORK_DIR + params.request_uuid + "/"
 
