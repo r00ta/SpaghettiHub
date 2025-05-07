@@ -76,10 +76,6 @@ class LaunchpadToGithubActivity(ActivityBase):
 
         activity.heartbeat()
 
-        command = (f"git remote add {params.merge_proposal_details.registrant} {params.merge_proposal_details.repo_url} && "
-                   f"git fetch {params.merge_proposal_details.registrant}")
-        subprocess.run(command, shell=True)
-
         activity.heartbeat()
 
         command = (f"cd {params.target_dir}maas-mirror-fork && "
