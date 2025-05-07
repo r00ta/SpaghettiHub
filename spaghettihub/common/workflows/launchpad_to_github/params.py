@@ -20,6 +20,8 @@ class MergeProposalDetails:
 class ActivityCreateGithubPullRequestParams:
     merge_proposal_id: str
     request_uuid: str
+    registrant: str
+    branch: str
     commit_message: str
 
 @dataclass

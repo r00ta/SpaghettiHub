@@ -88,6 +88,8 @@ class TemporalInternalLaunchpadToGithubWorkflow:
             ActivityCreateGithubPullRequestParams(
                 merge_proposal_id=params.merge_proposal_link.split("/")[-1],
                 request_uuid=params.request_uuid,
+                registrant=merge_proposal_details.registrant,
+                branch=merge_proposal_details.branch,
                 commit_message=merge_proposal_details.commit_message
             ),
             start_to_close_timeout=timedelta(seconds=60),
