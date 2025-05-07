@@ -77,7 +77,7 @@ class LaunchpadToGithubActivity(ActivityBase):
         activity.heartbeat()
 
         command = (f"git remote add {params.merge_proposal_details.registrant} {params.merge_proposal_details.repo_url} && "
-                   f"git remote fetch {params.merge_proposal_details.registrant}")
+                   f"git fetch {params.merge_proposal_details.registrant}")
         subprocess.run(command, shell=True)
 
         activity.heartbeat()
