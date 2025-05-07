@@ -52,8 +52,8 @@ class TemporalInternalLaunchpadToGithubWorkflow:
         if not os.path.exists(WORK_DIR):
             os.makedirs(WORK_DIR)
 
-        diff = await workflow.execute_activity(
-            "retrieve-merge-proposal-diff-from-launchpad",
+        merge_proposal_details = await workflow.execute_activity(
+            "retrieve-merge-proposal-from-launchpad",
             params.merge_proposal_link,
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)
@@ -73,7 +73,7 @@ class TemporalInternalLaunchpadToGithubWorkflow:
             ActivityCreateGithubBranchForPullRequestParams(
                 request_uuid=params.request_uuid,
                 target_dir=request_dir,
-                diff=diff
+                merge_proposal_details=merge_proposal_details
             ),
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)
@@ -83,7 +83,8 @@ class TemporalInternalLaunchpadToGithubWorkflow:
             "create-github-pull-request",
             ActivityCreateGithubPullRequestParams(
                 merge_proposal_id=params.merge_proposal_link.split("/")[-1],
-                request_uuid=params.request_uuid
+                request_uuid=params.request_uuid,
+                commit_message=merge_proposal_details.commit_message
             ),
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60),
