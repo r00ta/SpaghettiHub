@@ -80,7 +80,7 @@ class LaunchpadToGithubActivity(ActivityBase):
 
         command = (f"cd {params.target_dir}maas-mirror-fork && "
                    f"git remote add {params.merge_proposal_details.registrant} {params.merge_proposal_details.repo_url} && "
-                   f"git remote fetch {params.merge_proposal_details.registrant} && "
+                   f"git fetch {params.merge_proposal_details.registrant} && "
                    f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                    f"git merge {params.merge_proposal_details.registrant}/{params.merge_proposal_details.branch} && "
                    f"git push origin {params.request_uuid}")
