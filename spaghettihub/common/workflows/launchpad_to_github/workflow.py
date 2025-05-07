@@ -75,7 +75,9 @@ class TemporalInternalLaunchpadToGithubWorkflow:
             ActivityCreateGithubBranchForPullRequestParams(
                 request_uuid=params.request_uuid,
                 target_dir=request_dir,
-                merge_proposal_details=merge_proposal_details
+                registrant=merge_proposal_details.registrant,
+                branch=merge_proposal_details.branch,
+                repo_url=merge_proposal_details.repo_url
             ),
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)

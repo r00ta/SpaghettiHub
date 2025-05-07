@@ -26,7 +26,9 @@ class ActivityCreateGithubPullRequestParams:
 class ActivityCreateGithubBranchForPullRequestParams:
     request_uuid: str
     target_dir: str
-    merge_proposal_details: MergeProposalDetails
+    registrant: str
+    branch: str
+    repo_url: str
 
 
 @dataclass
