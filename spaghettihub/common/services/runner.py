@@ -61,7 +61,7 @@ class GithubWorkflowRunnerService(Service):
         if maas is not None:
             maas.commit_sha = request.head_commit.id
             maas.commit_message = request.head_commit.message
-            maas.committer_username = request.head_commit.author.username
+            maas.committer_username = request.head_commit.author.username or request.head_commit.author.name
             maas.commit_date = datetime.fromisoformat(request.head_commit.timestamp)
             await self.maas_repository.update(maas)
         else:

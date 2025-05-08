@@ -34,7 +34,7 @@ class GithubWebhook(BaseModel):
 class CommitAuthor(BaseModel):
     name: str
     email: str
-    username: str
+    username: Optional[str] = None
 
 
 class GithubCommit(BaseModel):
