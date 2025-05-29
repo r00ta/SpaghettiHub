@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import tempfile
@@ -16,6 +17,7 @@ from spaghettihub.server.base.db.database import Database
 
 CACHEDIR = "./cache"
 
+logger = logging.getLogger()
 
 class LaunchpadToGithubActivity(ActivityBase):
 
@@ -87,7 +89,8 @@ class LaunchpadToGithubActivity(ActivityBase):
                    f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                    f"git merge {params.registrant}/{params.branch}")
         run = subprocess.run(command, shell=True)
-        if run.returncode > 1:
+        if run.returncode > 0:
+            logger.info("There are conflicts. Trying with diff.")
             # conflict. We use the diff.
             with tempfile.TemporaryDirectory() as tmpdirname:
                 temp_dir = Path(tmpdirname)
@@ -99,7 +102,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                            f"git branch {params.request_uuid} && "
                            f"git checkout {params.request_uuid} && "
                            f"git apply {str(diff_file)} && "
-                           f"git add * && git commit -m 'enjoy this from r00ta' && git push origin {params.request_uuid}")
+                           f"git add * && git commit -m 'enjoy this from r00ta'")
                 subprocess.run(command, shell=True)
 
         command = f"git push origin {params.request_uuid}"
