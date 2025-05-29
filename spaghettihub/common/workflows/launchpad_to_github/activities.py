@@ -86,9 +86,8 @@ class LaunchpadToGithubActivity(ActivityBase):
                    f"git fetch {params.registrant} {params.branch} && "
                    f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                    f"git merge {params.registrant}/{params.branch}")
-        try:
-            subprocess.run(command, shell=True)
-        except:
+        run = subprocess.run(command, shell=True)
+        if run.returncode > 1:
             # conflict. We use the diff.
             with tempfile.TemporaryDirectory() as tmpdirname:
                 temp_dir = Path(tmpdirname)
