@@ -65,7 +65,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                        "git remote add mirror git@github.com:SpaghettiHub/maas.git && "
                        "git remote update"
                        )
-            subprocess.run(command, shell=True)
+            subprocess.run(command, shell=True, check=True)
             activity.heartbeat()
 
         update_command = ("cd /tmp/maas-mirror-fork && "
@@ -74,12 +74,12 @@ class LaunchpadToGithubActivity(ActivityBase):
                           "git reset --hard mirror/master && "
                           "git push origin master -f"
                           )
-        subprocess.run(update_command, shell=True)
+        subprocess.run(command, shell=True, check=True)
 
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> None:
         command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror-fork {params.target_dir}"
-        subprocess.run(command, shell=True)
+        subprocess.run(command, shell=True, check=True)
 
         activity.heartbeat()
 
@@ -88,8 +88,9 @@ class LaunchpadToGithubActivity(ActivityBase):
                    f"git fetch {params.registrant} {params.branch} && "
                    f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
                    f"git merge {params.registrant}/{params.branch}")
-        run = subprocess.run(command, shell=True)
-        if run.returncode > 0:
+        try:
+            subprocess.run(command, shell=True, check=True)
+        except:
             logger.info("There are conflicts. Trying with diff.")
             # conflict. We use the diff.
             with tempfile.TemporaryDirectory() as tmpdirname:
@@ -103,10 +104,10 @@ class LaunchpadToGithubActivity(ActivityBase):
                            f"git checkout {params.request_uuid} && "
                            f"git apply {str(diff_file)} && "
                            f"git add * && git commit -m 'enjoy this from r00ta'")
-                subprocess.run(command, shell=True)
+                subprocess.run(command, shell=True, check=True)
 
         command = f"git push origin {params.request_uuid}"
-        subprocess.run(command, shell=True)
+        subprocess.run(command, shell=True, check=True)
 
     @activity.defn(name="create-github-pull-request")
     async def create_github_pull_request(self, params: ActivityCreateGithubPullRequestParams) -> str:
