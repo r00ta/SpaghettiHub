@@ -79,7 +79,7 @@ class LaunchpadToGithubActivity(ActivityBase):
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> None:
         command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror-fork {params.target_dir}"
-        subprocess.run(command, shell=True, check=True)
+        subprocess.run(command, shell=True)
 
         activity.heartbeat()
 
@@ -98,6 +98,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                 diff_file = temp_dir / "patch.diff"
                 diff_file.write_text(params.diff)
                 command = (f"cd {params.target_dir}maas-mirror-fork && "
+                           f"git reset --hard && "
                            f"git checkout master && "
                            f"git branch -D {params.request_uuid} && "
                            f"git branch {params.request_uuid} && "
@@ -106,7 +107,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                            f"git add * && git commit -m 'enjoy this from r00ta'")
                 subprocess.run(command, shell=True, check=True)
 
-        command = f"git push origin {params.request_uuid}"
+        command = f"cd {params.target_dir}maas-mirror-fork && git push origin {params.request_uuid}"
         subprocess.run(command, shell=True, check=True)
 
     @activity.defn(name="create-github-pull-request")
