@@ -77,7 +77,8 @@ class TemporalInternalLaunchpadToGithubWorkflow:
                 target_dir=request_dir,
                 registrant=merge_proposal_details.registrant,
                 branch=merge_proposal_details.branch,
-                repo_url=merge_proposal_details.repo_url
+                repo_url=merge_proposal_details.repo_url,
+                diff=merge_proposal_details.diff
             ),
             start_to_close_timeout=timedelta(seconds=60),
             heartbeat_timeout=timedelta(seconds=60)

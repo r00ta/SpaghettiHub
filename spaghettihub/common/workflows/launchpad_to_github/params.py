@@ -14,7 +14,7 @@ class MergeProposalDetails:
     description: str
     branch: str
     repo_url: str
-
+    diff: str
 
 @dataclass
 class ActivityCreateGithubPullRequestParams:
@@ -31,7 +31,7 @@ class ActivityCreateGithubBranchForPullRequestParams:
     registrant: str
     branch: str
     repo_url: str
-
+    diff: str
 
 @dataclass
 class ActivityUpdateRequestParams:

@@ -32,8 +32,14 @@ class LaunchpadToGithubActivity(ActivityBase):
                 if not 200 <= int(response.status) < 300:
                     raise RuntimeError(f"Status: {response.status}")
                 merge_proposal_details = await response.json()
-
+                preview_diff_link = merge_proposal_details["preview_diff_link"]
+                preview_diff_link = preview_diff_link + "/+files/preview.diff"
             activity.heartbeat()
+
+            async with session.get(preview_diff_link) as response:
+                if not 200 <= int(response.status) < 300:
+                    raise RuntimeError(f"Status: {response.status}")
+                diff = await response.text()
 
             async with session.get(merge_proposal_details["source_git_repository_link"]) as response:
                 if not 200 <= int(response.status) < 300:
@@ -41,14 +47,13 @@ class LaunchpadToGithubActivity(ActivityBase):
                 git_repo_details = await response.json()
 
             return MergeProposalDetails(
-                registrant=merge_proposal_details["registrant_link"].split("/")[-1][1:], # remove the ~
+                registrant=merge_proposal_details["registrant_link"].split("/")[-1][1:],  # remove the ~
                 commit_message=merge_proposal_details["commit_message"],
                 description=merge_proposal_details["description"],
                 branch=merge_proposal_details["source_git_path"].split("/")[-1],
-                repo_url=git_repo_details["git_https_url"]
+                repo_url=git_repo_details["git_https_url"],
+                diff=diff
             )
-
-
 
     @activity.defn(name="update-github-fork-master-branch")
     async def update_github_fork_master_branch(self, target_dir: str) -> None:
@@ -70,7 +75,7 @@ class LaunchpadToGithubActivity(ActivityBase):
         subprocess.run(update_command, shell=True)
 
     @activity.defn(name="create-github-branch-for-pull-request")
-    async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> str:
+    async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> None:
         command = f"mkdir {params.target_dir} && cp -r /tmp/maas-mirror-fork {params.target_dir}"
         subprocess.run(command, shell=True)
 
@@ -80,8 +85,25 @@ class LaunchpadToGithubActivity(ActivityBase):
                    f"git remote add {params.registrant} {params.repo_url} && "
                    f"git fetch {params.registrant} {params.branch} && "
                    f"git checkout master && git branch {params.request_uuid} && git checkout {params.request_uuid} && "
-                   f"git merge {params.registrant}/{params.branch} && "
-                   f"git push origin {params.request_uuid}")
+                   f"git merge {params.registrant}/{params.branch}")
+        try:
+            subprocess.run(command, shell=True)
+        except:
+            # conflict. We use the diff.
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                temp_dir = Path(tmpdirname)
+                diff_file = temp_dir / "patch.diff"
+                diff_file.write_text(params.diff)
+                command = (f"cd {params.target_dir}maas-mirror-fork && "
+                           f"git checkout master && "
+                           f"git branch -D {params.request_uuid} && "
+                           f"git branch {params.request_uuid} && "
+                           f"git checkout {params.request_uuid} && "
+                           f"git apply {str(diff_file)} && "
+                           f"git add * && git commit -m 'enjoy this from r00ta' && git push origin {params.request_uuid}")
+                subprocess.run(command, shell=True)
+
+        command = f"git push origin {params.request_uuid}"
         subprocess.run(command, shell=True)
 
     @activity.defn(name="create-github-pull-request")
