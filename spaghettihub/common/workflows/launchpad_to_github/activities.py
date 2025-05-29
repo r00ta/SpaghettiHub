@@ -74,7 +74,7 @@ class LaunchpadToGithubActivity(ActivityBase):
                           "git reset --hard mirror/master && "
                           "git push origin master -f"
                           )
-        subprocess.run(command, shell=True, check=True)
+        subprocess.run(update_command, shell=True, check=True)
 
     @activity.defn(name="create-github-branch-for-pull-request")
     async def create_github_branch_for_pull_request(self, params: ActivityCreateGithubBranchForPullRequestParams) -> None:
