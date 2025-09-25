@@ -62,7 +62,7 @@ class GithubWorkflowRunnerService(Service):
             maas.commit_sha = request.head_commit.id
             maas.commit_message = request.head_commit.message
             maas.committer_username = request.head_commit.author.username or request.head_commit.author.name
-            maas.commit_date = datetime.fromisoformat(request.head_commit.timestamp)
+            maas.commit_date = datetime.fromisoformat(request.head_commit.timestamp.replace("Z", "+00:00"))
             await self.maas_repository.update(maas)
         else:
             await self.maas_repository.create(
