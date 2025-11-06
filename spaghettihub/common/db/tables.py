@@ -4,8 +4,10 @@ from sqlalchemy import (Column, DateTime, ForeignKey, Integer, LargeBinary,
 from spaghettihub.common.db.sequences import (BugCommentSequence,
                                               EmbeddingSequence,
                                               LaunchpadToGithubWorkSequence,
+                                              MAASSequence,
                                               MergeProposalsSequence,
-                                              MyTextSequence, UsersSequence, MAASSequence)
+                                              MirroredCommentSequence,
+                                              MyTextSequence, UsersSequence)
 
 METADATA = MetaData()
 
@@ -94,4 +96,18 @@ UserTable = Table(
     Column("id", Integer, UsersSequence, primary_key=True),
     Column("username", String(128), nullable=False),
     Column("password", Text, nullable=False)
+)
+
+MirroredCommentTable = Table(
+    "mirrored_comment",
+    METADATA,
+    Column("id", Integer, MirroredCommentSequence, primary_key=True),
+    Column("fingerprint", String(64), nullable=False, unique=True),
+    Column("github_comment_id", String(64), nullable=False),
+    Column("github_source", String(32), nullable=False),
+    Column("mp_identifier", String(256), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("posted_at", DateTime(timezone=True), nullable=True),
+    Column("status", String(32), nullable=False),
+    Column("error_message", Text, nullable=True),
 )

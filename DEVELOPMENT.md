@@ -58,4 +58,46 @@ and the server
 spaghettihubserver
 ```
 
+## Environment Variables
+
+The following environment variables are used by the application:
+
+- `GITHUB_TOKEN` (or `--gh_token` for worker): GitHub personal access token with repo permissions for API access
+
+## Using the Mirror PR Comments Tool
+
+The mirror PR comments tool allows you to mirror all open comments from a GitHub Pull Request to a Launchpad Merge Proposal.
+
+### API Endpoint
+
+`POST /v1/tools/mirror-pr-comments`
+
+**Request Body:**
+```json
+{
+  "github_pr_url": "https://github.com/owner/repo/pull/123",
+  "launchpad_mp_url": "https://code.launchpad.net/~owner/project/+merge/456",
+  "include_outdated": false,
+  "include_review_states": false
+}
+```
+
+**Response:**
+```json
+{
+  "workflow_id": "mirror-pr-comments-<hash>",
+  "status": "started"
+}
+```
+
+**Options:**
+- `include_outdated` (bool): Include outdated review comments (default: false)
+- `include_review_states` (bool): Include review approval/rejection states as comments (default: false)
+
+The tool will:
+1. Fetch all issue comments and review comments from the GitHub PR
+2. Deduplicate against already mirrored comments (idempotent)
+3. Post new comments to the Launchpad MP
+4. Record sync metadata in the database
+
 Please note that some configurations are hardcoded. Contributions to make the code generic are more than welcome

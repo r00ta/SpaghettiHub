@@ -10,9 +10,15 @@ from spaghettihub.common.workflows.launchpad_to_github.activities import \
 from spaghettihub.common.workflows.launchpad_to_github.workflow import (
     TemporalInternalLaunchpadToGithubWorkflow,
     TemporalLaunchpadToGithubWorkflow)
-from spaghettihub.common.workflows.runner.activities import GithubRunnerActivity
-from spaghettihub.common.workflows.runner.workflow import TemporalGithubRunnerWorkflow, TemporalInternalGithubRunnerWorkflow, \
-    GithubWorkflowWebhookRunnerWorkflow, GithubPushWebhookWorkflow
+from spaghettihub.common.workflows.mirror_pr_comments.activities import \
+    MirrorPRCommentsActivity
+from spaghettihub.common.workflows.mirror_pr_comments.workflow import \
+    MirrorPullRequestCommentsWorkflow
+from spaghettihub.common.workflows.runner.activities import \
+    GithubRunnerActivity
+from spaghettihub.common.workflows.runner.workflow import (
+    GithubPushWebhookWorkflow, GithubWorkflowWebhookRunnerWorkflow,
+    TemporalGithubRunnerWorkflow, TemporalInternalGithubRunnerWorkflow)
 from spaghettihub.server.base.db.database import Database
 from spaghettihub.server.settings import read_config
 
@@ -23,7 +29,9 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
     db = Database(config=read_config().db)
 
     launchpad_to_github_activity = LaunchpadToGithubActivity(db, gh_token)
-    github_runner_activity = GithubRunnerActivity(db, gh_runner_token, lxd_host, lxd_trusted_password)
+    github_runner_activity = GithubRunnerActivity(
+        db, gh_runner_token, lxd_host, lxd_trusted_password)
+    mirror_pr_comments_activity = MirrorPRCommentsActivity(db, gh_token)
     worker = Worker(
         client,
         task_queue=TASK_QUEUE_NAME,
@@ -32,7 +40,8 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
                    TemporalGithubRunnerWorkflow,
                    TemporalInternalGithubRunnerWorkflow,
                    GithubWorkflowWebhookRunnerWorkflow,
-                   GithubPushWebhookWorkflow
+                   GithubPushWebhookWorkflow,
+                   MirrorPullRequestCommentsWorkflow
                    ],
         activities=[
             launchpad_to_github_activity.retrieve_merge_proposal_diff_from_launchpad,
@@ -45,6 +54,11 @@ async def main(gh_token: str, gh_runner_token: str, lxd_host: str, lxd_trusted_p
             github_runner_activity.destroy_runner,
             github_runner_activity.update_commit_metadata,
             github_runner_activity.update_continuous_delivery_commit_metadata,
+            mirror_pr_comments_activity.parse_input,
+            mirror_pr_comments_activity.fetch_github_comments,
+            mirror_pr_comments_activity.filter_deduplicate,
+            mirror_pr_comments_activity.post_launchpad_comments,
+            mirror_pr_comments_activity.record_sync,
         ],
     )
     await worker.run()
@@ -66,4 +80,5 @@ def run():
                         type=str,
                         help="The LXD trusted password")
     args = parser.parse_args()
-    asyncio.run(main(args.gh_token, args.gh_runner_token, args.lxd_host, args.lxd_trusted_password))
+    asyncio.run(main(args.gh_token, args.gh_runner_token,
+                args.lxd_host, args.lxd_trusted_password))
