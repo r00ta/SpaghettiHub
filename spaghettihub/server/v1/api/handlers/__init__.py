@@ -5,8 +5,11 @@ from spaghettihub.server.v1.api.handlers.github import \
     LaunchpadToGithubWorkHandler
 from spaghettihub.server.v1.api.handlers.merge_proposals import \
     MergeProposalsHandler
+from spaghettihub.server.v1.api.handlers.mirror_comments import \
+    MirrorPRCommentsHandler
 from spaghettihub.server.v1.api.handlers.root import RootHandler
-from spaghettihub.server.v1.api.handlers.runner import GithubWorkflowRunnerHandler
+from spaghettihub.server.v1.api.handlers.runner import \
+    GithubWorkflowRunnerHandler
 
 APIv1 = API(
     prefix="/v1",
@@ -16,6 +19,7 @@ APIv1 = API(
         LaunchpadToGithubWorkHandler(),
         BugsHandler(),
         AuthHandler(),
-        GithubWorkflowRunnerHandler()
+        GithubWorkflowRunnerHandler(),
+        MirrorPRCommentsHandler()
     ],
 )

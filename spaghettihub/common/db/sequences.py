@@ -9,3 +9,4 @@ LaunchpadToGithubWorkSequence = Sequence(
     "launchpad_to_github_work_id_seq", start=1)
 UsersSequence = Sequence("user_auth_id_seq", start=1)
 MAASSequence = Sequence("maas_id_seq", start=1)
+MirroredCommentSequence = Sequence("mirrored_comment_id_seq", start=1)

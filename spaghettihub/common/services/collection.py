@@ -7,6 +7,7 @@ from spaghettihub.common.db.github import LaunchpadToGithubWorkRepository
 from spaghettihub.common.db.last_update import LastUpdateRepository
 from spaghettihub.common.db.maas import MAASRepository
 from spaghettihub.common.db.merge_proposals import MergeProposalsRepository
+from spaghettihub.common.db.mirrored_comments import MirroredCommentsRepository
 from spaghettihub.common.db.texts import TextsRepository
 from spaghettihub.common.db.users import UsersRepository
 from spaghettihub.common.services.bugs import BugsService
@@ -15,6 +16,7 @@ from spaghettihub.common.services.embeddings import (EmbeddingsCache,
 from spaghettihub.common.services.github import LaunchpadToGithubWorkService
 from spaghettihub.common.services.last_update import LastUpdateService
 from spaghettihub.common.services.merge_proposals import MergeProposalsService
+from spaghettihub.common.services.mirror_comments import MirrorCommentsService
 from spaghettihub.common.services.runner import GithubWorkflowRunnerService
 from spaghettihub.common.services.texts import TextsService
 from spaghettihub.common.services.users import UsersService
@@ -29,6 +31,8 @@ class ServiceCollection:
     launchpad_to_github_work_service: LaunchpadToGithubWorkService
     users_service: UsersService
     github_workflow_runner_service: GithubWorkflowRunnerService
+    mirror_comments_service: MirrorCommentsService
+    mirrored_comments_repository: MirroredCommentsRepository
 
     @classmethod
     def produce(cls, connection_provider: ConnectionProvider, embeddings_cache: EmbeddingsCache | None = None,
@@ -75,7 +79,8 @@ class ServiceCollection:
         )
         services.github_workflow_runner_service = GithubWorkflowRunnerService(
             connection_provider=connection_provider,
-            maas_repository=MAASRepository(connection_provider=connection_provider),
+            maas_repository=MAASRepository(
+                connection_provider=connection_provider),
             webhook_secret=webhook_secret,
             temporal_client=temporal_client
         )
@@ -84,5 +89,13 @@ class ServiceCollection:
             users_repository=UsersRepository(
                 connection_provider=connection_provider
             )
+        )
+        services.mirrored_comments_repository = MirroredCommentsRepository(
+            connection_provider=connection_provider
+        )
+        services.mirror_comments_service = MirrorCommentsService(
+            connection_provider=connection_provider,
+            mirrored_comments_repository=services.mirrored_comments_repository,
+            temporal_client=temporal_client
         )
         return services
