@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -10,6 +11,6 @@ class MirroredComment(BaseModel):
     github_source: str
     mp_identifier: str
     created_at: datetime
-    posted_at: datetime | None = None
+    posted_at: Optional[datetime] = None
     status: str
-    error_message: str | None = None
+    error_message: Optional[str] = None

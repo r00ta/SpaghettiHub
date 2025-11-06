@@ -17,7 +17,7 @@ class MirrorCommentsService(Service):
             self,
             connection_provider: ConnectionProvider,
             mirrored_comments_repository: MirroredCommentsRepository,
-            temporal_client: Client | None = None
+            temporal_client: Optional[Client] = None
     ):
         super().__init__(connection_provider)
         self.mirrored_comments_repository = mirrored_comments_repository

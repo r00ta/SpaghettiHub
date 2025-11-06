@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -25,8 +25,8 @@ class UnifiedComment:
     author_login: str
     body: str
     created_at: str
-    path: str | None = None
-    line: int | None = None
+    path: Optional[str] = None
+    line: Optional[int] = None
     fingerprint: str = ""
 
 
