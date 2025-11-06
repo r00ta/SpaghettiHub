@@ -31,8 +31,21 @@ class UnifiedComment:
 
 
 @dataclass
+class FetchCommentsParams:
+    parsed_input: ParsedInputParams
+    include_outdated: bool
+    include_review_states: bool
+
+
+@dataclass
 class FetchCommentsResult:
     comments: List[UnifiedComment]
+
+
+@dataclass
+class FilterDeduplicateParams:
+    comments: List[UnifiedComment]
+    mp_identifier: str
 
 
 @dataclass
@@ -42,10 +55,24 @@ class FilterDeduplicateResult:
 
 
 @dataclass
+class PostCommentsParams:
+    comments: List[UnifiedComment]
+    mp_identifier: str
+    launchpad_mp_url: str
+
+
+@dataclass
 class PostCommentsResult:
     posted_count: int
     error_count: int
     errors: List[str]
+
+
+@dataclass
+class RecordSyncParams:
+    comments: List[UnifiedComment]
+    mp_identifier: str
+    post_result: PostCommentsResult
 
 
 @dataclass

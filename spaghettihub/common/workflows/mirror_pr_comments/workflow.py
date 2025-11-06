@@ -5,8 +5,10 @@ from temporalio.common import RetryPolicy
 
 from spaghettihub.common.workflows.constants import TASK_QUEUE_NAME
 from spaghettihub.common.workflows.mirror_pr_comments.params import (
-    FetchCommentsResult, FilterDeduplicateResult, MirrorCommentsResult,
-    MirrorPullRequestCommentsParams, ParsedInputParams, PostCommentsResult)
+    FetchCommentsParams, FetchCommentsResult, FilterDeduplicateParams,
+    FilterDeduplicateResult, MirrorCommentsResult,
+    MirrorPullRequestCommentsParams, ParsedInputParams, PostCommentsParams,
+    PostCommentsResult, RecordSyncParams)
 
 with workflow.unsafe.imports_passed_through():
     pass
@@ -30,11 +32,11 @@ class MirrorPullRequestCommentsWorkflow:
             # Fetch comments from GitHub
             fetch_result: FetchCommentsResult = await workflow.execute_activity(
                 "fetch-github-comments",
-                {
-                    "parsed_input": parsed_input,
-                    "include_outdated": params.include_outdated,
-                    "include_review_states": params.include_review_states,
-                },
+                FetchCommentsParams(
+                    parsed_input=parsed_input,
+                    include_outdated=params.include_outdated,
+                    include_review_states=params.include_review_states,
+                ),
                 start_to_close_timeout=timedelta(seconds=120),
                 retry_policy=RetryPolicy(
                     maximum_attempts=3,
@@ -46,10 +48,10 @@ class MirrorPullRequestCommentsWorkflow:
             # Filter and deduplicate
             filter_result: FilterDeduplicateResult = await workflow.execute_activity(
                 "filter-deduplicate-comments",
-                {
-                    "comments": fetch_result.comments,
-                    "mp_identifier": parsed_input.mp_identifier,
-                },
+                FilterDeduplicateParams(
+                    comments=fetch_result.comments,
+                    mp_identifier=parsed_input.mp_identifier,
+                ),
                 start_to_close_timeout=timedelta(seconds=60),
             )
 
@@ -61,11 +63,11 @@ class MirrorPullRequestCommentsWorkflow:
             if filter_result.new_comments:
                 post_result = await workflow.execute_activity(
                     "post-launchpad-comments",
-                    {
-                        "comments": filter_result.new_comments,
-                        "mp_identifier": parsed_input.mp_identifier,
-                        "launchpad_mp_url": params.launchpad_mp_url,
-                    },
+                    PostCommentsParams(
+                        comments=filter_result.new_comments,
+                        mp_identifier=parsed_input.mp_identifier,
+                        launchpad_mp_url=params.launchpad_mp_url,
+                    ),
                     start_to_close_timeout=timedelta(seconds=300),
                     retry_policy=RetryPolicy(
                         maximum_attempts=3,
@@ -77,11 +79,11 @@ class MirrorPullRequestCommentsWorkflow:
                 # Record sync metadata
                 await workflow.execute_activity(
                     "record-sync-metadata",
-                    {
-                        "comments": filter_result.new_comments,
-                        "mp_identifier": parsed_input.mp_identifier,
-                        "post_result": post_result,
-                    },
+                    RecordSyncParams(
+                        comments=filter_result.new_comments,
+                        mp_identifier=parsed_input.mp_identifier,
+                        post_result=post_result,
+                    ),
                     start_to_close_timeout=timedelta(seconds=60),
                 )
 

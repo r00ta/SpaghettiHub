@@ -13,9 +13,10 @@ from spaghettihub.common.models.mirrored_comments import MirroredComment
 from spaghettihub.common.services.collection import ServiceCollection
 from spaghettihub.common.workflows.base import ActivityBase
 from spaghettihub.common.workflows.mirror_pr_comments.params import (
-    FetchCommentsResult, FilterDeduplicateResult,
-    MirrorPullRequestCommentsParams, ParsedInputParams, PostCommentsResult,
-    UnifiedComment)
+    FetchCommentsParams, FetchCommentsResult, FilterDeduplicateParams,
+    FilterDeduplicateResult, MirrorPullRequestCommentsParams,
+    ParsedInputParams, PostCommentsParams, PostCommentsResult,
+    RecordSyncParams, UnifiedComment)
 from spaghettihub.server.base.db.database import Database
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ class MirrorPRCommentsActivity(ActivityBase):
 
     @activity.defn(name="fetch-github-comments")
     async def fetch_github_comments(
-        self, parsed_input: ParsedInputParams, include_outdated: bool, include_review_states: bool
+        self, params: FetchCommentsParams
     ) -> FetchCommentsResult:
         """Fetch all comments from GitHub PR."""
         comments = []
@@ -75,13 +76,13 @@ class MirrorPRCommentsActivity(ActivityBase):
         async with aiohttp.ClientSession() as session:
             # Fetch issue comments
             issue_comments_url = (
-                f"https://api.github.com/repos/{parsed_input.github_owner}/"
-                f"{parsed_input.github_repo}/issues/{parsed_input.github_pr_number}/comments"
+                f"https://api.github.com/repos/{params.parsed_input.github_owner}/"
+                f"{params.parsed_input.github_repo}/issues/{params.parsed_input.github_pr_number}/comments"
             )
             async with session.get(issue_comments_url, headers=headers) as response:
                 if response.status == 404:
                     raise ValueError(
-                        f"GitHub PR not found: {parsed_input.github_owner}/{parsed_input.github_repo}#{parsed_input.github_pr_number}")
+                        f"GitHub PR not found: {params.parsed_input.github_owner}/{params.parsed_input.github_repo}#{params.parsed_input.github_pr_number}")
                 response.raise_for_status()
                 issue_comments = await response.json()
 
@@ -100,8 +101,8 @@ class MirrorPRCommentsActivity(ActivityBase):
 
             # Fetch review comments
             review_comments_url = (
-                f"https://api.github.com/repos/{parsed_input.github_owner}/"
-                f"{parsed_input.github_repo}/pulls/{parsed_input.github_pr_number}/comments"
+                f"https://api.github.com/repos/{params.parsed_input.github_owner}/"
+                f"{params.parsed_input.github_repo}/pulls/{params.parsed_input.github_pr_number}/comments"
             )
             async with session.get(review_comments_url, headers=headers) as response:
                 response.raise_for_status()
@@ -109,7 +110,7 @@ class MirrorPRCommentsActivity(ActivityBase):
 
                 for comment in review_comments:
                     # Skip outdated comments if not requested
-                    if not include_outdated and comment.get("original_position") is None:
+                    if not params.include_outdated and comment.get("original_position") is None:
                         continue
 
                     unified = UnifiedComment(
@@ -128,10 +129,10 @@ class MirrorPRCommentsActivity(ActivityBase):
             activity.heartbeat()
 
             # Fetch review states if requested
-            if include_review_states:
+            if params.include_review_states:
                 reviews_url = (
-                    f"https://api.github.com/repos/{parsed_input.github_owner}/"
-                    f"{parsed_input.github_repo}/pulls/{parsed_input.github_pr_number}/reviews"
+                    f"https://api.github.com/repos/{params.parsed_input.github_owner}/"
+                    f"{params.parsed_input.github_repo}/pulls/{params.parsed_input.github_pr_number}/reviews"
                 )
                 async with session.get(reviews_url, headers=headers) as response:
                     response.raise_for_status()
@@ -159,7 +160,7 @@ class MirrorPRCommentsActivity(ActivityBase):
 
     @activity.defn(name="filter-deduplicate-comments")
     async def filter_deduplicate(
-        self, comments: List[UnifiedComment], mp_identifier: str
+        self, params: FilterDeduplicateParams
     ) -> FilterDeduplicateResult:
         """Filter out already mirrored comments."""
         async with self.start_transaction() as connection:
@@ -169,14 +170,14 @@ class MirrorPRCommentsActivity(ActivityBase):
                 connection_provider=connection_provider)
 
             existing_comments = await services.mirrored_comments_repository.find_by_mp_identifier(
-                mp_identifier
+                params.mp_identifier
             )
             existing_fingerprints = {c.fingerprint for c in existing_comments}
 
             new_comments = [
-                c for c in comments if c.fingerprint not in existing_fingerprints
+                c for c in params.comments if c.fingerprint not in existing_fingerprints
             ]
-            skipped_count = len(comments) - len(new_comments)
+            skipped_count = len(params.comments) - len(new_comments)
 
             logger.info(
                 f"Filtered comments: {len(new_comments)} new, {skipped_count} skipped"
@@ -189,7 +190,7 @@ class MirrorPRCommentsActivity(ActivityBase):
 
     @activity.defn(name="post-launchpad-comments")
     async def post_launchpad_comments(
-        self, comments: List[UnifiedComment], mp_identifier: str, launchpad_mp_url: str
+        self, params: PostCommentsParams
     ) -> PostCommentsResult:
         """Post comments to Launchpad MP."""
         posted_count = 0
@@ -202,12 +203,12 @@ class MirrorPRCommentsActivity(ActivityBase):
             )
 
             # Parse MP URL to get the merge proposal
-            mp_url_api = launchpad_mp_url.replace(
+            mp_url_api = params.launchpad_mp_url.replace(
                 "https://code.launchpad.net/", "https://api.launchpad.net/devel/"
             )
             mp = launchpad.load(mp_url_api)
 
-            for comment in comments:
+            for comment in params.comments:
                 try:
                     # Format comment with context
                     formatted_body = self._format_comment_for_launchpad(
@@ -229,7 +230,7 @@ class MirrorPRCommentsActivity(ActivityBase):
             error_msg = f"Failed to connect to Launchpad: {str(e)}"
             errors.append(error_msg)
             logger.error(error_msg)
-            error_count = len(comments)
+            error_count = len(params.comments)
 
         logger.info(
             f"Posted {posted_count} comments, {error_count} errors"
@@ -244,9 +245,7 @@ class MirrorPRCommentsActivity(ActivityBase):
     @activity.defn(name="record-sync-metadata")
     async def record_sync(
         self,
-        comments: List[UnifiedComment],
-        mp_identifier: str,
-        post_result: PostCommentsResult
+        params: RecordSyncParams
     ) -> None:
         """Record mirrored comments in database."""
         async with self.start_transaction() as connection:
@@ -258,19 +257,20 @@ class MirrorPRCommentsActivity(ActivityBase):
             now = datetime.utcnow()
 
             # Track which comments were posted successfully
-            posted_comments_by_id = {c.id: c for c in comments}
+            posted_comments_by_id = {c.id: c for c in params.comments}
 
-            for comment in comments:
+            for comment in params.comments:
                 status = "posted"
                 posted_at = now
                 error_message = None
 
                 # If there were errors, mark some as errored
                 # This is a simplification - in production you'd track individual failures
-                if post_result.error_count > 0:
+                if params.post_result.error_count > 0:
                     # Mark proportionally as errored
-                    if len(comments) > 0:
-                        error_ratio = post_result.error_count / len(comments)
+                    if len(params.comments) > 0:
+                        error_ratio = params.post_result.error_count / \
+                            len(params.comments)
                         if hash(comment.id) % 100 < error_ratio * 100:
                             status = "error"
                             posted_at = None
@@ -281,7 +281,7 @@ class MirrorPRCommentsActivity(ActivityBase):
                     fingerprint=comment.fingerprint,
                     github_comment_id=comment.id,
                     github_source=comment.source,
-                    mp_identifier=mp_identifier,
+                    mp_identifier=params.mp_identifier,
                     created_at=now,
                     posted_at=posted_at,
                     status=status,
@@ -291,7 +291,7 @@ class MirrorPRCommentsActivity(ActivityBase):
                 await services.mirrored_comments_repository.create(mirrored_comment)
 
             logger.info(
-                f"Recorded {len(comments)} mirrored comments in database")
+                f"Recorded {len(params.comments)} mirrored comments in database")
 
     def _generate_fingerprint(self, comment: UnifiedComment) -> str:
         """Generate SHA256 fingerprint for a comment."""
